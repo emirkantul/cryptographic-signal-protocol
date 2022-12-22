@@ -1,0 +1,216 @@
+Identitiy Key is created
++++++++++++++++++++++++++++++++++++++++++++++
+IKey is a long term key and shouldn't be changed and private part should be kept secret. But this is a sample run, so here is my private IKey: 
+My ID number is 26045
+
++++++++++++++++++++++++++++++++++++++++++++++
+Signature of my ID number is:
+h= 100439841906836619890660842478871982805829851889742875201683143648871194663323 
+s= 24922964796794415029055423492028520435465010856430957271576528272425430745502
+
++++++++++++++++++++++++++++++++++++++++++++++
+Sending signature and my IKEY to server via IKRegReq() function in json format
+Sending message is:  {'ID': 26045, 'H': 100439841906836619890660842478871982805829851889742875201683143648871194663323, 'S': 24922964796794415029055423492028520435465010856430957271576528272425430745502, 'IKPUB.X': 32129680288907602454356264456786107734763079699477222157657421974584671022577, 'IKPUB.Y': 112224890328802439127211105103635410342924536231707327123181781318706279405510}
++++++++++++++++++++++++++++++++++++++++++++++
+Received the verification code through email
++++++++++++++++++++++++++++++++++++++++++++++
+Enter verification code which is sent to you: 
++++++++++++++++++++++++++++++++++++++++++++++
+Sending the verification code to server via IKRegVerify() function in json format
+Sending message is:  {'ID': 26045, 'CODE': 0}
+Registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+Generating SPK...
+Private SPK: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Public SPK.x: 5980450516931675812177161267037297324109284655261529934319936522438435267323
+Public SPK.y: 104682100106524596546836325449433608461527426838842535489407281499222230467265
+Convert SPK.x and SPK.y to bytes in order to sign them then concatenate them
+result will be like: b'\r8\xd0\xa6i\xb0^\x1cw\xcen\x14Z\x85\x983\xa77\xcf\nmkls\x04\x9a\xa2]\xedy\xe2\xfb\xe7o\xf8\x0f\xd1\xe9\xd1hu1\x85R\xe5\x85g\x16"3\xa2O\xd6\xaa(\xcf2\xa0+r\x804\x82\xc1'
+
++++++++++++++++++++++++++++++++++++++++++++++
+Signature of SPK is:
+h= 42258094725381190877793268981738911306635699189132015133720484530452688771774 
+s= 99194389354754291366594006117811083277505785011073898810736673177115408937929
+Sending SPK and the signatures to the server via SPKReg() function in json format...
+
++++++++++++++++++++++++++++++++++++++++++++++
+Sending message is:  {'ID': 26045, 'H': 42258094725381190877793268981738911306635699189132015133720484530452688771774, 'S': 99194389354754291366594006117811083277505785011073898810736673177115408937929, 'SPKPUB.X': 5980450516931675812177161267037297324109284655261529934319936522438435267323, 'SPKPUB.Y': 104682100106524596546836325449433608461527426838842535489407281499222230467265}
+if server verifies the signature it will send its SPK and corresponding signature. If this is the case SPKReg() function will return those
+Server's SPK Verification
+Recreating the message(SPK) signed by the server
+
++++++++++++++++++++++++++++++++++++++++++++++
+Verifying the server's SPK...
+If server's SPK is verified we can move to the OTK generation step
+Is SPK verified?:  True
+
++++++++++++++++++++++++++++++++++++++++++++++
+Creating HMAC key (Diffie Hellman)
++++++++++++++++++++++++++++++++++++++++++++++
+T is  (0xd37c6bc848edb7de057d6afc17fd19fb392d9bb1cad8fcaaa405ce3d1439aedd , 0x21da320ba15cd4d7746dc9cbf0a038c21c007a8b74724d2b8c47436c178da304)
+U is  b'CuriosityIsTheHMACKeyToCreativity!\xda2\x0b\xa1\\\xd4\xd7tm\xc9\xcb\xf0\xa08\xc2\x1c\x00z\x8btrM+\x8cGCl\x17\x8d\xa3\x04\xd3|k\xc8H\xed\xb7\xde\x05}j\xfc\x17\xfd\x19\xfb9-\x9b\xb1\xca\xd8\xfc\xaa\xa4\x05\xce=\x149\xae\xdd'
+HMAC key is created  b'P\x8e:\xfa\x13\x9a\xf0^\x96\xcc\xbdg1\x10#\x9e\xa2h7\xe6\x01&z\xfc9\x00\x11[\xc0\xdf\t\x98'
++++++++++++++++++++++++++++++++++++++++++++++
+
+Creating OTKs starting from index 0...
+
+0th key generated. Private part=39893104232940108421187975624282402623153915269123248217623058408441886593094
+Public (x coordinate)=91915107602276359510465012531385366797664293265062582330766357369271351017739
+Public (y coordinate)=8082522961258570724661886958187851799005036427922549182317674299021433055311
+x and y coordinates of the OTK converted to bytes and concatanated
+message b'\xcb6\x1bx\x987w\xc9\xca\xe6u\xb8.\xaf\xac\x95*\xde|\x97Y\x1e@\xb0:{2\xff\xc5\xfc\x81\x0b\x11\xde\x8b\xbe\xcfJ4=\x1f\xab\xe6Dz\xa8\xe7\xc1L\xf3\x16Ul\xe7;g\xc8q7lN}(O'
+hmac is calculated and converted with 'hexdigest()': 
+0cfd4e4a50e1d1a05b81e0795804d2e421f9e8414d78ece43c9cf8698d5031c5
+
+Sending message is:  {'ID': 26045, 'KEYID': 0, 'OTKI.X': 91915107602276359510465012531385366797664293265062582330766357369271351017739, 'OTKI.Y': 8082522961258570724661886958187851799005036427922549182317674299021433055311, 'HMACI': '0cfd4e4a50e1d1a05b81e0795804d2e421f9e8414d78ece43c9cf8698d5031c5'}
+OTK with ID number 0 is registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+
+1th key generated. Private part=101305239837684515365325061983300956503517952471343039350940213043647160465139
+Public (x coordinate)=46435103086802758869907739534280594365179168838365903298234592283521053516880
+Public (y coordinate)=50447059942652417016956828525828713656410322870216065699130568025455624290519
+x and y coordinates of the OTK converted to bytes and concatanated
+message b'f\xa9VC\xc6\x13V\xf2\x9a\xea\x0e\xf3\x8a\x00\xd5i\xdd\x12\xa1\xf8\xc9\xf5\x89\xb3P\xa2P\\\xc5^dPo\x88\x06*;\xdc\x88;P\x1c\xe1\x00\x0e\x1e\x94\xd9\x85\x84V\xc5\x8f\xed\xc8AP\x00~\xa9r\x85\x80\xd7'
+hmac is calculated and converted with 'hexdigest()': 
+a884f01f818f00d8bf743862e8e8cfad19414f484f760eaf9a55983c90e6a481
+
+Sending message is:  {'ID': 26045, 'KEYID': 1, 'OTKI.X': 46435103086802758869907739534280594365179168838365903298234592283521053516880, 'OTKI.Y': 50447059942652417016956828525828713656410322870216065699130568025455624290519, 'HMACI': 'a884f01f818f00d8bf743862e8e8cfad19414f484f760eaf9a55983c90e6a481'}
+OTK with ID number 1 is registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+
+2th key generated. Private part=34158588017091965218180326791872554730208687254326795215499278040062948873570
+Public (x coordinate)=33088070906568718393448854862844870607102150704761846707102261014234678680013
+Public (y coordinate)=89226027612387010013320246138693764844229892243713564802589653418538659840234
+x and y coordinates of the OTK converted to bytes and concatanated
+message b"I'/95\xd3\xbd5;\x18\x17\xb1l\xd1\x04v\x1b\xd1\x07Ua\xac\xfd\xae;\x0e\xe0^\x7f\x0f\xd9\xcd\xc5D$X6t\x8d&\x1e\xb1 \x7f.\xb4\xcd\x92Bu By\xb4b\xb7\xda\xa7\xe2\x9a\x1c\xcd\x80\xea"
+hmac is calculated and converted with 'hexdigest()': 
+7fd5766eda801b0fd3ef0d7bcbb2f0bf849280552bcbcee2ad3abeed945bf446
+
+Sending message is:  {'ID': 26045, 'KEYID': 2, 'OTKI.X': 33088070906568718393448854862844870607102150704761846707102261014234678680013, 'OTKI.Y': 89226027612387010013320246138693764844229892243713564802589653418538659840234, 'HMACI': '7fd5766eda801b0fd3ef0d7bcbb2f0bf849280552bcbcee2ad3abeed945bf446'}
+OTK with ID number 2 is registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+
+3th key generated. Private part=43561410372213542452919837201314904623339368093796626557613549455099875183328
+Public (x coordinate)=27754185950877515107921812135419018590011160618398879014516293374636872536521
+Public (y coordinate)=23896386282846366527309458896116421247710710047861012123762825730381366383107
+x and y coordinates of the OTK converted to bytes and concatanated
+message b'=\\P\x04\\\xf8\xe7\x83\xa6\x12\xa4\xed\xe3A\xe5\xab\x93\x8d\xc0<\x18\x91\x97s\x1a\x94b\xa8\x1a5\x91\xc94\xd4\xe0\x15\xcb\x9c\xe3\xae\xa1\xdb\x8e,`\xcbD\xcf$T\xd7\xcf\x14I\x91ky=\t\xd3\xf8\x1fR\x03'
+hmac is calculated and converted with 'hexdigest()': 
+18990140ef7059123d0ccb79ae7476684f1bd6a470f8ed9523c9d3110fc96108
+
+Sending message is:  {'ID': 26045, 'KEYID': 3, 'OTKI.X': 27754185950877515107921812135419018590011160618398879014516293374636872536521, 'OTKI.Y': 23896386282846366527309458896116421247710710047861012123762825730381366383107, 'HMACI': '18990140ef7059123d0ccb79ae7476684f1bd6a470f8ed9523c9d3110fc96108'}
+OTK with ID number 3 is registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+
+4th key generated. Private part=1445435310868401798526260436970873581639041545602398531767395540262839680148
+Public (x coordinate)=27417091799340848116317968586574023625028947153541316829692807428257483166357
+Public (y coordinate)=8854331404949741068864090086079007178567720631092266250329958190894880927998
+x and y coordinates of the OTK converted to bytes and concatanated
+message b"<\x9d\x86'\\[?\xc2n\x8cJ\xaa\x16K7\xd0\xe1n\xe1\xbd\xa0hn\t\xce\xf1\xe4b\x8fU\x92\x95\x13\x93_\xbd\x13\x1b\xda\x9dsY-2\xc7\t\x1ac\xdb\xbe:\xce\xfb\xb2P'\xe6\xde8h\xbe(0\xfe"
+hmac is calculated and converted with 'hexdigest()': 
+67191e6602b0f1c075e0966603d39b1f298ee99dac96ae321a7e95de400f5694
+
+Sending message is:  {'ID': 26045, 'KEYID': 4, 'OTKI.X': 27417091799340848116317968586574023625028947153541316829692807428257483166357, 'OTKI.Y': 8854331404949741068864090086079007178567720631092266250329958190894880927998, 'HMACI': '67191e6602b0f1c075e0966603d39b1f298ee99dac96ae321a7e95de400f5694'}
+OTK with ID number 4 is registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+
+5th key generated. Private part=4111558723233585305467443730181138781168484874852225321067888054026430359742
+Public (x coordinate)=24712661804379906498952711068215967910182915748129911957305141493325815465626
+Public (y coordinate)=50624314637291700009709673216408457156780509905079964701778589736699805558911
+x and y coordinates of the OTK converted to bytes and concatanated
+message b'6\xa2\xde\xf3\xa5\x8a<\xbe/m\x8be\x1a\xe2\xe6\x82n\xbfG\xedD\x8f\xa9\x89B\x13\x92\x0b\xa0\x95\xc6\x9ao\xecX\xc0E\x10\x0f-\xf6\xdb~8\xedaW\xc2\x97\xb4\x12\x12\x1f#\x87m\xf8\x8d\xf3\x90\xd4\xf3\xe8\x7f'
+hmac is calculated and converted with 'hexdigest()': 
+dcd6b4f2265c88000ff0da9c420ea34f7533b97a84719e74d86f8e09704ede69
+
+Sending message is:  {'ID': 26045, 'KEYID': 5, 'OTKI.X': 24712661804379906498952711068215967910182915748129911957305141493325815465626, 'OTKI.Y': 50624314637291700009709673216408457156780509905079964701778589736699805558911, 'HMACI': 'dcd6b4f2265c88000ff0da9c420ea34f7533b97a84719e74d86f8e09704ede69'}
+OTK with ID number 5 is registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+
+6th key generated. Private part=84293444349356705807792144134908735224812121755251626354783169873538158675658
+Public (x coordinate)=105044005167932976904141951519066374672050743152541656868516103126255134617392
+Public (y coordinate)=102082926341951140093189253526628026124635470511141714488820591655731283763645
+x and y coordinates of the OTK converted to bytes and concatanated
+message b'\xe8<\xcc\xcc\x9e\x0c\xcb\xf8\xe2\xee\xd5\x85\xd78e\xbb\xa6\xee\x87\xdb:\xf7\xecm\xcf?\xed\xabp`\xaf0\xe1\xb0\xe3\x86\xadg\x91\x9f\xf1\xee\xbcC\\-\x9d\xce\r\x8b\x8b\xd3}\xf9&\x04\x8fE\xcaU\xdb\xce!\xbd'
+hmac is calculated and converted with 'hexdigest()': 
+9b4193c66f60c29f2d4757a86d905cbd0c0d2603d213f81868214e3d67e3ef40
+
+Sending message is:  {'ID': 26045, 'KEYID': 6, 'OTKI.X': 105044005167932976904141951519066374672050743152541656868516103126255134617392, 'OTKI.Y': 102082926341951140093189253526628026124635470511141714488820591655731283763645, 'HMACI': '9b4193c66f60c29f2d4757a86d905cbd0c0d2603d213f81868214e3d67e3ef40'}
+OTK with ID number 6 is registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+
+7th key generated. Private part=10154157491850351689041189521879067039886600575695164065344638616382857311738
+Public (x coordinate)=101146708919194016508475642732074556896145841408704171024680621053958090732341
+Public (y coordinate)=21941738881169916128702795089167485106537889756076565263627002566272669838374
+x and y coordinates of the OTK converted to bytes and concatanated
+message b'\xdf\x9f\x02,r\xda\x89H\xf5/\xe9\x13`\xa1\xf0\xe8k\xb5S\xda\xcd\x81\xc1\x07F\xac\x18\x82\xd9\xf9350\x82\x95\x88%\xeb\xb67\xcc\x010\xe9Uk\x95\x13\xc8\xb0\xf0\xc9\x84\xba\xe0\x0e\x939\x03\xe5\xd0-\xec&'
+hmac is calculated and converted with 'hexdigest()': 
+76eb665794aeb5c6a64288844af5221f21b93b6b4c139acb1d2d458868309282
+
+Sending message is:  {'ID': 26045, 'KEYID': 7, 'OTKI.X': 101146708919194016508475642732074556896145841408704171024680621053958090732341, 'OTKI.Y': 21941738881169916128702795089167485106537889756076565263627002566272669838374, 'HMACI': '76eb665794aeb5c6a64288844af5221f21b93b6b4c139acb1d2d458868309282'}
+OTK with ID number 7 is registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+
+8th key generated. Private part=98731977351880917693580897780392994148429528742365185500738864934860618697646
+Public (x coordinate)=33333939882520171614287173024588224650383637876405288634539601154766614452851
+Public (y coordinate)=44883355547582010699964674690765001310895199384954632224081905600678186474944
+x and y coordinates of the OTK converted to bytes and concatanated
+message b"I\xb2Wdc\x8e\x01\xe9H\x9c\x11W\xd6\xe3\xbft`a\x1f1\xb8\x8e\x10B)\xefns.\xe2Zsc;\x148\x9b\x16\xc0=\xd2\x00\xc02w\x1d\x83')'\x17J8\x1cI\xb9\xd9\xc9\x80\xb3\x96L]\xc0"
+hmac is calculated and converted with 'hexdigest()': 
+9801802488969c671b532296f66fa2d91ba8fbb1f67cd62fb875a012951fc98f
+
+Sending message is:  {'ID': 26045, 'KEYID': 8, 'OTKI.X': 33333939882520171614287173024588224650383637876405288634539601154766614452851, 'OTKI.Y': 44883355547582010699964674690765001310895199384954632224081905600678186474944, 'HMACI': '9801802488969c671b532296f66fa2d91ba8fbb1f67cd62fb875a012951fc98f'}
+OTK with ID number 8 is registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+
+9th key generated. Private part=94332060354504285157663084631425879373080793535419285800071870307970945640186
+Public (x coordinate)=37604299956553819647832593632485518162739272083338881189866211157563511524048
+Public (y coordinate)=68412471582812128647080856999119979938562959017215610389558350569898643589174
+x and y coordinates of the OTK converted to bytes and concatanated
+message b'S#G\x8e\xe9T<\xb3>f\xc3\x0c\xec\x00\xbdh\x91\xab\xde\x90WG\x19\xf8\x06\x19Qu*%\xca\xd0\x97@\x163\xc9u\xab\xf9\xde\x06\xe4\xdd\xcc\xd3\xe6\xc1+m\xa6\x1a)\xf3\xd4LB-\t>\x04\xb0\x886'
+hmac is calculated and converted with 'hexdigest()': 
+e8b7c9c5704cc40c4b127d167457bcbb5d59c3b1e9ed276b7c44e1bb39789024
+
+Sending message is:  {'ID': 26045, 'KEYID': 9, 'OTKI.X': 37604299956553819647832593632485518162739272083338881189866211157563511524048, 'OTKI.Y': 68412471582812128647080856999119979938562959017215610389558350569898643589174, 'HMACI': 'e8b7c9c5704cc40c4b127d167457bcbb5d59c3b1e9ed276b7c44e1bb39789024'}
+OTK with ID number 9 is registered successfully
+
++++++++++++++++++++++++++++++++++++++++++++++
+
+10th key generated. Private part=54398013119160042993914621179640924021059891563951292770267125469958890866844
+Public (x coordinate)=67439092188740426084813343012313753987060034786798054098329413170279805800685
+Public (y coordinate)=108495170635582767228493382584051507927031316375365736287180053621039461935835
+x and y coordinates of the OTK converted to bytes and concatanated
+message b'\x95\x19,kn\xb9\xa5c\x8e\x8f\x9bi\xeb\x8f\t\x7f2\x93\xc8\x94\xfe]\x15\xfci\xc9\xc6\x97.V\xd0\xed\xef\xde\x17&i\xf2\x03\xac\x00\xbb#<\x01\xc5\xe8\xcc\x04\x8a\x98\xa8Vs\xde\rz\xe2\x94$\xd1M\xaa\xdb'
+hmac is calculated and converted with 'hexdigest()': 
+0f80d080a7de36258ce0405f3ebbad8d7d4c195bd0006fc611c8a244de0cd3f2
+
+Sending message is:  {'ID': 26045, 'KEYID': 10, 'OTKI.X': 67439092188740426084813343012313753987060034786798054098329413170279805800685, 'OTKI.Y': 108495170635582767228493382584051507927031316375365736287180053621039461935835, 'HMACI': '0f80d080a7de36258ce0405f3ebbad8d7d4c195bd0006fc611c8a244de0cd3f2'}
+
++++++++++++++++++++++++++++++++++++++++++++++
+Key memory is full. There are 10 keys registered. No need to register more keys
+
++++++++++++++++++++++++++++++++++++++++++++++
+Trying to delete OTKs...
+Sending message is:  {'ID': 26045, 'H': 21746462743053424710576350400160736588046720044292563778610498443273168732393, 'S': 106045445348827935625566724654444483270140495487907953320829365807971067853486}
+Trying to delete OTKs but sending wrong signatures...
+Sending message is:  {'ID': 26045, 'H': 66762980599639891024518044962611025902463308029968403514797765850455928911892, 'S': 10477470436724998762998398447966000368455202445096309572911695301324743879463}
+The server couldn't verify the signature!!
++++++++++++++++++++++++++++++++++++++++++++++
+
+Trying to delete SPK...
+Sending message is:  {'ID': 26045, 'H': 58774406835187637157810135025913504850814202284765293110704734284087406907391, 'S': 1704305139216155485146733131738022425111031392093372340940097249818920445399}
+SPK and OTKs are deleted!
++++++++++++++++++++++++++++++++++++++++++++++
+Trying to delete Identity Key...
+Sending message is:  {'ID': 26045, 'RCODE': 0}
+Deleted successfully
+
