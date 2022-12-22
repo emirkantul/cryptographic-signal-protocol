@@ -82,3 +82,4 @@ def ResetOTK(h,s):
     response = requests.delete('{}/{}'.format(API_URL, "ResetOTK"), json = mes)		
     if((response.ok) == False): print(response.json())
 
+print("deneme")
