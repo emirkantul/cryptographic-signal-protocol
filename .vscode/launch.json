@@ -1,15 +1,15 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Run Client",
-      "type": "python",
-      "request": "launch",
-      "program": "${workspaceFolder}/src/Client.py",
-      "cwd": "${workspaceFolder}/src/",
-      "python": "${workspaceFolder}/src/.venv/bin/python3.10",
-      "console": "integratedTerminal",
-      "justMyCode": true
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Client",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/Client.py",
+            "cwd": "${workspaceFolder}/src/",
+            "python": "${workspaceFolder}/src/.venv/bin/python3.10",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
 }
