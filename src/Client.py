@@ -140,3 +140,20 @@ IKRegVerify(code=code, stuID=stuID, IKey_Pub=IKey_Pub)
 
 rcode = 765639
 '''
+#signature for SPK
+h, s = generate_signature(stuID=stuID, IKey_Pr=IKey_Pr, generator=generator, order=order)
+V = s * generator + h * IKey_Pub
+v = V.x % order
+
+v_byte = v.to_bytes(32, 'big')
+stuID_byte = stuID.to_bytes(2, 'big')
+
+h_new = SHA3_256.SHA3_256_Hash(v_byte+ stuID_byte, True)
+h_new = SHA3_256.SHA3_256_Hash.digest(h_new)
+h_new = int.from_bytes(h_new,"big")
+h_new = h_new % order
+
+if (h == h_new):
+    print("Your h and h_new is same, verified") #verified
+else:
+    print("Your h and h_new is not the same, not verified!") #not verified
