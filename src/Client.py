@@ -21,7 +21,7 @@ API_URL = 'http://10.92.55.4:5000'
 stuID = 27041 #Enter Your ID
 
 #Server's Identitiy public key
-IKey_Ser = # Use the values in the project description document to form the server's IK as a point on the EC. Note that the values should be in decimal.
+IKey_Ser = 1# Use the values in the project description document to form the server's IK as a point on the EC. Note that the values should be in decimal.
 
 def IKRegReq(h,s,x,y):
     mes = {'ID':stuID, 'H': h, 'S': s, 'IKPUB.X': x, 'IKPUB.Y': y}
@@ -82,3 +82,4 @@ def ResetOTK(h,s):
     response = requests.delete('{}/{}'.format(API_URL, "ResetOTK"), json = mes)		
     if((response.ok) == False): print(response.json())
 
+print("deneme")
