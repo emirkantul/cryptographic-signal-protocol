@@ -7,7 +7,8 @@ from Crypto.Random import random
 API_URL = 'http://10.92.55.4:5000'
 
 stuID = 28129 #Enter Your ID
-
+X:0xce1a69ecc226f9e667856ce37a44e50dbea3d58e3558078baee8fe5e017a556d
+Y:0x13ddaf97158206b1d80258d7f6a6880e7aaf13180e060bb1e94174e419a4a093
 # Given helper functions
 def IKRegReq(h,s,x,y):
     mes = {'ID':stuID, 'H': h, 'S': s, 'IKPUB.X': x, 'IKPUB.Y': y}
@@ -161,6 +162,8 @@ SPKey_Pr = 284437346984299154352356758411497887960368135750729987643821842052848
 SPKey_Pub = Point(int("0x53b28329f905959ff156edef5a760174f77068994acbdbeb0faf7881dc487e9f",base=16) , int("0x4430dd6595e5d6ad36439523d88ab239b6783e0a9506ba7ba9e5586532a9a7",base = 16), curve=curve)
 print("\nSigned Pre-key Private:", SPKey_Pr)
 print("Signed Pre-key Public:",SPKey_Pub)
+SPKey_Pub.x:  284440755748455301221211980686918077798988279098356633098201790404106566834
+SPKey_Pub.y: 45347188833655408095659911893603159693192956049050462530814683658147455843366
 
 '''
 Signed Pre-key generation
@@ -200,6 +203,7 @@ def generate_spk_signature(SPKey_Pub, IKey_Pr, generator, order):
 
     print("Signature h:", h)
     print("Signature s:", s)
+    print(curve.is_on_curve(SPKey_Pub))
     
     return h, s
 
@@ -207,6 +211,17 @@ def generate_spk_signature(SPKey_Pub, IKey_Pr, generator, order):
 
 msg = SPKey_Pub.x.to_bytes((SPKey_Pub.x.bit_length()+7)//8,byteorder="big") + SPKey_Pub.y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
 msg = int.from_bytes(msg,byteorder="big")
-server_h, server_s = generate_idk_signature(msg,IKey_Pr,generator,order)
-server_h = SPKReg(server_h, server_s, SPKey_Pub.x, SPKey_Pub.y)
+h, s = generate_idk_signature(msg,IKey_Pr,generator,order)
+h = SPKReg(h, s, SPKey_Pub.x, SPKey_Pub.y)
 
+#k_hmac generation
+T = SPKey_Pr * SPKey_Pub
+t_byte_x = T.x.to_bytes(32, 'big')
+t_byte_y = T.y.to_bytes(32, 'big')
+curiosity_byte = b'CuriosityIsTheHMACKeyToCreativity'
+U = t_byte_x + t_byte_y + curiosity_byte
+
+k_hmac = SHA3_256.SHA3_256_Hash(U, True)
+k_hmac = SHA3_256.SHA3_256_Hash.digest(k_hmac)
+
+#registration of otk
