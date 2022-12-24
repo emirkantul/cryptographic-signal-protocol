@@ -103,7 +103,7 @@ Ik_pub.y = 811400972849661914599565221166166685794108727290314136738033284539074
 
 # Identity Key signature generator
 def generate_idk_signature(stuID, IKey_Pr, generator, order): 
-    stuID_bytes = stuID.to_bytes(2,byteorder="big")
+    stuID_bytes = stuID.to_bytes((stuID.bit_length() +7)//8,byteorder="big")
     k = random.randint(1, order-2)
     R = k * generator
     r = (R.x) % order
@@ -115,7 +115,7 @@ def generate_idk_signature(stuID, IKey_Pr, generator, order):
 
     print("Signature h:", h)
     print("Signature s:", s)
-    print(curve.is_on_curve(IKey_Pr))
+    
     return h, s
 
 '''
@@ -133,9 +133,32 @@ IKRegVerify(code=code, stuID=stuID, IKey_Pub=IKey_Pub)
 '''
 rcode = 765639
 
+'''
+#verify idk
+V = s * generator + h * IKey_Pub
+v = V.x % order
+
+v_byte = v.to_bytes(32, 'big')
+stuID_byte = stuID.to_bytes(2, 'big')
+
+
+h2 = SHA3_256.SHA3_256_Hash(v_byte+ stuID_byte, True)
+h2 = SHA3_256.SHA3_256_Hash.digest(h2)
+h2 = int.from_bytes(h2,"big")
+h2 = h2 % order
+print(h2)
+
+if (h == h2):
+    print("Accept!") #verified
+else:
+    print("Not verified!") #not verified
+
+'''
+
+
 
 SPKey_Pr = 28443734698429915435235675841149788796036813575072998764382184205284851724196
-SPKey_Pub = Point(0x53b28329f905959ff156edef5a760174f77068994acbdbeb0faf7881dc487e9f , 0x4430dd6595e5d6ad36439523d88ab239b6783e0a9506ba7ba9e5586532a9a7, curve=curve)
+SPKey_Pub = Point(int("0x53b28329f905959ff156edef5a760174f77068994acbdbeb0faf7881dc487e9f",base=16) , int("0x4430dd6595e5d6ad36439523d88ab239b6783e0a9506ba7ba9e5586532a9a7",base = 16), curve=curve)
 print("\nSigned Pre-key Private:", SPKey_Pr)
 print("Signed Pre-key Public:",SPKey_Pub)
 
@@ -152,12 +175,14 @@ print("SPKey_Pub:",SPKey_pub)
 print("SPKey_Pub.x:",SPKey_Pub.x)
 print("SPKey_Pub.y:",SPKey_Pub.y)
 
+
+
 SPKey_Pr: 94741850143076570100947103970147402003043264805151825233728149463189264816411
 SPKey_Pub: (0x53b28329f905959ff156edef5a760174f77068994acbdbeb0faf7881dc487e9f , 0x4430dd6595e5d6ad36439523d88ab239b6783e0a9506ba7ba9e5586532a9a7)
 SPKey_Pub.x:  284440755748455301221211980686918077798988279098356633098201790404106566834
 SPKey_Pub.y: 45347188833655408095659911893603159693192956049050462530814683658147455843366
-'''
 
+'''
 #  Signed Pre-key signature generator
 def generate_spk_signature(SPKey_Pub, IKey_Pr, generator, order): 
     xBytes = SPKey_Pub.x.to_bytes(32, 'big')
@@ -166,16 +191,22 @@ def generate_spk_signature(SPKey_Pub, IKey_Pr, generator, order):
     k = random.randint(1, order-2)
     R = k * generator
     r = (R.x) % order
-    r_bytes = r.to_bytes(32, 'big')
-    h = SHA3_256.SHA3_256_Hash(r_bytes+ msg, True)
-    h = SHA3_256.SHA3_256_Hash.digest(h)
-    h = int.from_bytes(h,"big") % order
-    s = (k + (SPKey_Pr * h)) % order
+    #r_bytes = r.to_bytes(32, 'big')
+    h = int.from_bytes(SHA3_256.new(r.to_bytes((r.bit_length()+7)//8, byteorder='big')+msg).digest(), byteorder='big')%order
+    #h = SHA3_256.SHA3_256_Hash(r_bytes+ msg, True)
+    #h = SHA3_256.SHA3_256_Hash.digest(h)
+    #h = int.from_bytes(h,"big") % order
+    s = (k + (IKey_Pr * h)) % order
 
     print("Signature h:", h)
     print("Signature s:", s)
-    print(curve.is_on_curve(SPKey_Pub))
+    
     return h, s
 
-h, s = generate_spk_signature(SPKey_Pub=SPKey_Pub, IKey_Pr=IKey_Pr, generator=generator, order=order)
-server_x, server_y, server_h, server_s = SPKReg(h, s, IKey_Pub.x, IKey_Pub.y)
+
+
+msg = SPKey_Pub.x.to_bytes((SPKey_Pub.x.bit_length()+7)//8,byteorder="big") + SPKey_Pub.y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
+msg = int.from_bytes(msg,byteorder="big")
+server_h, server_s = generate_idk_signature(msg,IKey_Pr,generator,order)
+server_h = SPKReg(server_h, server_s, SPKey_Pub.x, SPKey_Pub.y)
+
