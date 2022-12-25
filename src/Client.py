@@ -7,9 +7,8 @@ from Crypto.Hash import  HMAC
 
 API_URL = 'http://10.92.55.4:5000'
 
-stuID = 28129 #Enter Your ID
-X:0xce1a69ecc226f9e667856ce37a44e50dbea3d58e3558078baee8fe5e017a556d
-Y:0x13ddaf97158206b1d80258d7f6a6880e7aaf13180e060bb1e94174e419a4a093
+stuID = 27041 #Enter Your ID
+
 # Given helper functions
 def IKRegReq(h,s,x,y):
     mes = {'ID':stuID, 'H': h, 'S': s, 'IKPUB.X': x, 'IKPUB.Y': y}
@@ -74,214 +73,163 @@ field = curve.field
 order = curve.order
 generator = curve.generator
 
+# Signature Generator
+def generate_signature(msg, sA, generator, order):
+    k = random.randint(1, order-2)
+    R = k * generator
+    r = (R.x) % order
+    r_bytes = r.to_bytes(32, 'big')
+    h = SHA3_256.SHA3_256_Hash(r_bytes + msg, True)
+    h = SHA3_256.SHA3_256_Hash.digest(h)
+    h = int.from_bytes(h,"big") % order
+    s = (k + (sA * h)) % order
+
+    print("\nSignature h:", h)
+    print("Signature s:", s)
+    
+    return h, s
+
+# Private key generator
+def generate_private_key(order, generator):
+    print("\nGenerating private and public keys..")
+    # Select random secret sA where 0 < sA < n-1
+    sA = random.randint(1, order-1)
+    print("sA =",sA)
+
+    # create long term public key
+    sA_pub = sA*generator
+    print("sA_pub =",sA_pub)
+    print("sA_pub.x =",sA_pub.x)
+    print("sA_pub.y =",sA_pub.y)
+
+    return sA, sA_pub
+
+def verify_signature(h, s, qA, msg, order, generator):
+    V = s * generator - h * qA
+    v = V.x % order
+
+    v_byte = v.to_bytes(32, 'big')
+
+    h2 = SHA3_256.SHA3_256_Hash(v_byte+ msg, True)
+    h2 = SHA3_256.SHA3_256_Hash.digest(h2)
+    h2 = int.from_bytes(h2,"big")
+    h2 = h2 % order
+    print(h2)
+
+    if (h == h2):
+        print("Signature verified!") #verified
+    else:
+        print("Signature not verified!") #not verified
+
+
 # Server's identity public key 
 IKey_Ser = Point(0xce1a69ecc226f9e667856ce37a44e50dbea3d58e3558078baee8fe5e017a556d , 0x13ddaf97158206b1d80258d7f6a6880e7aaf13180e060bb1e94174e419a4a093, curve)
 print("Server Public Identity Key:", IKey_Ser)
 
 # Client's identity public key and private key
-IKey_Pub = Point(0xf061448e9f63ae9015605c705a2fe16da20270dac4518910fb66995cdd2b30c , 0xb363aae72aefeb60b50f692c980488d160140ca373d881347ac8e1c8150eb415, curve)
-IKey_Pr = 88811684008176007899207926081968991205376073643343601281773818664985783616780
-print("Client Public Identity Key:", IKey_Pub)
+IKey_Pr = 54711695610845891711285415678093810504562500554097973349097378295447174968645
+IKey_Pub = Point(0xeaa0b601668eba6177eb13991f611a8a3017fe64ca9635fc2b8154d3f78e1954 , 0x576cc7f8888c1291a324704a695539cf8e4f86634a4527b69cc27dcb4109c424, curve)
+print("\nClient Public Identity Key:", IKey_Pub)
 print("Client Private Identity Key:", IKey_Pr)
 
 '''
-Identity Key generation
+# Identity Key generation
+IKey_Pr, IKey_Pub = generate_private_key(order, generator)
 
-# Select random secret sA where 0 < sA < n-1
-sA = random.randint(1, order-1)
-print("sA =",sA)
-
-# create long term public key
-Ik_pub = sA*generator
-print("Ik_pub =",Ik_pub)
-print("Ik_pub.x =",Ik_pub.x)
-print("Ik_pub.y =",Ik_pub.y)
-
-sA = 88811684008176007899207926081968991205376073643343601281773818664985783616780
-Ik_pub = (0xf061448e9f63ae9015605c705a2fe16da20270dac4518910fb66995cdd2b30c , 0xb363aae72aefeb60b50f692c980488d160140ca373d881347ac8e1c8150eb415)
-Ik_pub.x = 6795433811819819131752285391518736675983624010180123841332452236942390768396
-Ik_pub.y = 81140097284966191459956522116616668579410872729031413673803328453907451917333
+# IKey_Pr: 54711695610845891711285415678093810504562500554097973349097378295447174968645
+# IKey_Pub: (0xeaa0b601668eba6177eb13991f611a8a3017fe64ca9635fc2b8154d3f78e1954 , 0x576cc7f8888c1291a324704a695539cf8e4f86634a4527b69cc27dcb4109c4240x576cc7f8888c1291a324704a695539cf8e4f86634a4527b69cc27dcb4109c424)
+# IKey_Pub.x: 106125158254444507586124357737838011183233385576686272071348298652513412716884
+# IKey_Pub.y: 39543417457710120237121373054221395027999800633142105468250786347587046327332
 '''
 
-# Identity Key signature generator
-def generate_idk_signature(stuID, IKey_Pr, generator, order): 
-    stuID_bytes = stuID.to_bytes((stuID.bit_length() +7)//8,byteorder="big")
-    k = random.randint(1, order-2)
-    R = k * generator
-    r = (R.x) % order
-    r_bytes = r.to_bytes(32, 'big')
-    h = SHA3_256.SHA3_256_Hash(r_bytes+ stuID_bytes, True)
-    h = SHA3_256.SHA3_256_Hash.digest(h)
-    h = int.from_bytes(h,"big") % order
-    s = (k + (IKey_Pr * h)) % order
-
-    print("Signature h:", h)
-    print("Signature s:", s)
-    
-    return h, s
 
 '''
 IK Registration signature generation 
-h, s = generate_idk_signature(stuID=stuID, IKey_Pr=IKey_Pr, generator=generator, order=order)
+
+stuID_bytes = stuID.to_bytes((stuID.bit_length() +7)//8,byteorder="big")
+h, s = generate_signature(msg=stuID_bytes, sA=IKey_Pr, generator=generator, order=order)
 IKRegReq(h, s, IKey_Pub.x, IKey_Pub.y)
 
-code = 380271
+code = 103096
 '''
-code = 380271
+code = 103096
 
 '''
-IK Registration verification 
+# IK Registration verification 
 IKRegVerify(code=code, stuID=stuID, IKey_Pub=IKey_Pub)
 '''
-rcode = 765639
-
-'''
-#verify idk
-V = s * generator + h * IKey_Pub
-v = V.x % order
-
-v_byte = v.to_bytes(32, 'big')
-stuID_byte = stuID.to_bytes(2, 'big')
+rcode = 368095
 
 
-h2 = SHA3_256.SHA3_256_Hash(v_byte+ stuID_byte, True)
-h2 = SHA3_256.SHA3_256_Hash.digest(h2)
-h2 = int.from_bytes(h2,"big")
-h2 = h2 % order
-print(h2)
-
-if (h == h2):
-    print("Accept!") #verified
-else:
-    print("Not verified!") #not verified
-
-'''
-
-
-
-SPKey_Pr = 28443734698429915435235675841149788796036813575072998764382184205284851724196
-SPKey_Pub = Point(int("0x53b28329f905959ff156edef5a760174f77068994acbdbeb0faf7881dc487e9f",base=16) , int("0x4430dd6595e5d6ad36439523d88ab239b6783e0a9506ba7ba9e5586532a9a7",base = 16), curve=curve)
+# Client Signed Pre-key
+SPKey_Pr = 24373054577699454663564151012111011615866473942778748787713915925292914841793
+SPKey_Pub = Point(int("0xc763f5b6ca6fc8fb746d204b99fd47df2a79056d668dc613894c55bdff47398d",base=16) , int("0x5b7cf45b7ee2d189189fa38d47a6cbb2b986bf539620b2695840711bc32c9333",base = 16), curve=curve)
 print("\nSigned Pre-key Private:", SPKey_Pr)
 print("Signed Pre-key Public:",SPKey_Pub)
-SPKey_Pub.x:  284440755748455301221211980686918077798988279098356633098201790404106566834
-SPKey_Pub.y: 45347188833655408095659911893603159693192956049050462530814683658147455843366
 
 '''
-Signed Pre-key generation
+# Signed Pre-key generation
 
-# Select random secret sA where 0 < sA < n-1
-SPKey_Pr = random.randint(1, order-1)
-print("SPKey_Pr:", SPKey_Pr)
+SPKey_Pr, SPKey_pub = generate_private_key(order, generator)
 
-# create long term public key
-SPKey_pub = SPKey_Pr * generator
-print("SPKey_Pub:",SPKey_pub)
-print("SPKey_Pub.x:",SPKey_Pub.x)
-print("SPKey_Pub.y:",SPKey_Pub.y)
+# SPKey_Pr: 24373054577699454663564151012111011615866473942778748787713915925292914841793
+# SPKey_Pub: (0xc763f5b6ca6fc8fb746d204b99fd47df2a79056d668dc613894c55bdff47398d , 0x5b7cf45b7ee2d189189fa38d47a6cbb2b986bf539620b2695840711bc32c9333)
+# SPKey_Pub.x:  90186870583367397078994984968597413955227984672863262182290021294247000881549
+# SPKey_Pub.y: 41381244749936181075457993058941167828970061873112217764976555947988353848115
+'''
 
-
-
-SPKey_Pr: 94741850143076570100947103970147402003043264805151825233728149463189264816411
-SPKey_Pub: (0x53b28329f905959ff156edef5a760174f77068994acbdbeb0faf7881dc487e9f , 0x4430dd6595e5d6ad36439523d88ab239b6783e0a9506ba7ba9e5586532a9a7)
-SPKey_Pub.x:  284440755748455301221211980686918077798988279098356633098201790404106566834
-SPKey_Pub.y: 45347188833655408095659911893603159693192956049050462530814683658147455843366
 
 '''
-#  Signed Pre-key signature generator
-def generate_spk_signature(SPKey_Pub, IKey_Pr, generator, order): 
-    xBytes = SPKey_Pub.x.to_bytes(32, 'big')
-    yBytes = SPKey_Pub.y.to_bytes(32, 'big')
-    msg = xBytes + yBytes
-    k = random.randint(1, order-2)
-    R = k * generator
-    r = (R.x) % order
-    #r_bytes = r.to_bytes(32, 'big')
-    h = int.from_bytes(SHA3_256.new(r.to_bytes((r.bit_length()+7)//8, byteorder='big')+msg).digest(), byteorder='big')%order
-    #h = SHA3_256.SHA3_256_Hash(r_bytes+ msg, True)
-    #h = SHA3_256.SHA3_256_Hash.digest(h)
-    #h = int.from_bytes(h,"big") % order
-    s = (k + (IKey_Pr * h)) % order
-
-    print("Signature h:", h)
-    print("Signature s:", s)
-    print(curve.is_on_curve(SPKey_Pub))
-    
-    return h, s
-
-
+# SPK Registration signature generation 
 
 msg = SPKey_Pub.x.to_bytes((SPKey_Pub.x.bit_length()+7)//8,byteorder="big") + SPKey_Pub.y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
-msg = int.from_bytes(msg,byteorder="big")
-h, s = generate_idk_signature(msg,IKey_Pr,generator,order)
-h = SPKReg(h, s, SPKey_Pub.x, SPKey_Pub.y)
+h, s = generate_signature(msg=msg, sA=IKey_Pr, generator=generator, order=order)
+resp_x, resp_y, resp_h, resp_s  = SPKReg(h, s, SPKey_Pub.x, SPKey_Pub.y)
 
-#k_hmac generation
-T = SPKey_Pr * SPKey_Pub
-t_byte_x = T.x.to_bytes(32, 'big')
-t_byte_y = T.y.to_bytes(32, 'big')
-curiosity_byte = b'CuriosityIsTheHMACKeyToCreativity'
-U = curiosity_byte + t_byte_y + t_byte_x 
-
-hasher = SHA3_256.new()
-hasher.update(U)
-k_hmac = str(hasher.hexdigest())
-
-
-#registration of otk
+# Server Point: (0x7d38f788a09a94b29ef81b95e812816889e9d2fcbbd51909c94cbda2e9bcc736 , 0x8585933fcc79add8ab5bb6a824e5170b68d82c12a543b1576610dd4210775333)
 '''
-# Select random secret sA where 0 < sA < n-1
-sA0 = random.randint(1, order-1)
-print("sA1 =",sA0)
-
-sA1 = random.randint(1, order-1)
-print("sA1 =",sA1)
-
-sA2 = random.randint(1, order-1)
-print("sA2 =",sA2)
-
-sA3 = random.randint(1, order-1)
-print("sA3 =",sA3)
-
-sA4 = random.randint(1, order-1)
-print("sA4 =",sA4)
-
-sA5 = random.randint(1, order-1)
-print("sA5 =",sA5)
-
-sA6 = random.randint(1, order-1)
-print("sA6 =",sA6)
-
-sA7 = random.randint(1, order-1)
-print("sA1 =",sA7)
-
-sA8 = random.randint(1, order-1)
-print("sA1 =",sA8)
-
-sA9 = random.randint(1, order-1)
-print("sA1 =",sA9)
 
 
 '''
-def otk_cal (k_hmac, okt):
-    h_temp = HMAC.new(k_hmac, digestmod=SHA256)
-    okt_x_y = okt.x.to_bytes(32, 'big') + okt.y.to_bytes(32, 'big')
-    h_temp.update(okt_x_y)
-    return h_temp.hexdigest()
+# Signature Verification
 
-otk_priv_arr = []
+resp_x_bytes = resp_x.to_bytes((resp_x.bit_length() + 7) // 8, byteorder='big')
+resp_y_bytes = resp_y.to_bytes((resp_y.bit_length() + 7) // 8, byteorder='big')
+resp_h_bytes = resp_h.to_bytes((resp_h.bit_length() + 7) // 8, byteorder='big')
+resp_s_bytes = resp_s.to_bytes((resp_s.bit_length() + 7) // 8, byteorder='big')
+resp_msg = resp_x_bytes + resp_y_bytes
+SPK_Pub_Server = Point(resp_x, resp_y, curve)
+print("Server Point:", SPK_Pub_Server)
 
-for i in range(0,10):
+msg = SPKey_Pub.x.to_bytes((resp_x.bit_length()+7)//8,byteorder="big") + resp_y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
+verify_signature(h=resp_h, s=resp_s, qA=IKey_Ser, msg=resp_msg, order=order, generator=generator)
+msg = SPKey_Pub.x.to_bytes((resp_x.bit_length()+7)//8,byteorder="big") + resp_y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
+verify_signature(resp_h, resp_s, SPKey_Pub, msg, order, generator)
+'''
+SPK_Pub_Server = Point(0x7d38f788a09a94b29ef81b95e812816889e9d2fcbbd51909c94cbda2e9bcc736 , 0x8585933fcc79add8ab5bb6a824e5170b68d82c12a543b1576610dd4210775333, curve=curve)
 
-    otk_priv = random.randint(0, order-1) #otk_priv is private key
-    print("otk_priv_ ", i ,":", otk_priv)
 
-    otk_pub = otk_priv * generator #otk_pub is public key
-    print("otk_pub_ ", i ,":",otk_pub)
+# Generating HMAC Key
+T = SPKey_Pr * SPK_Pub_Server
+Tx_bytes = T.x.to_bytes((T.x.bit_length() + 7) // 8, byteorder='big')
+Ty_bytes = T.y.to_bytes((T.y.bit_length() + 7) // 8, byteorder='big')
+U = b'CuriosityIsTheHMACKeyToCreativity' + Ty_bytes + Tx_bytes
+hashVal3 = SHA3_256.new(U)
+k_HMAC = int.from_bytes(hashVal3.digest(), 'big') % order
+k_HMAC_bytes = k_HMAC.to_bytes((k_HMAC.bit_length() + 7) // 8, byteorder='big')
+print("\nT: ({} , {})".format(hex(T.x), hex(T.y)))
+print("U:",U)
+print("HMAC key:", k_HMAC_bytes)
 
-    a = OTKReg(i,otk_pub.x,otk_pub.y,otk_cal(k_hmac, otk_pub))
 
-    print("Result :", a)
-    print("")
-    otk_priv_arr.append(otk_priv)
-
-print(otk_priv_arr)
+# Create and register OTKs
+for i in range(10):
+    OTK_pr, OTK0_pub = generate_private_key(order=order, generator=generator)
+    print("\n", str(i) + "th OTK.")
+    print("OTK private:", OTK_pr)
+    print("OTK public:", OTK0_pub)
+    OTK0_x_bytes = OTK0_pub.x.to_bytes((OTK0_pub.x.bit_length() + 7) // 8, byteorder='big')
+    OTK0_y_bytes = OTK0_pub.y.to_bytes((OTK0_pub.y.bit_length() + 7) // 8, byteorder='big')
+    temp = OTK0_x_bytes + OTK0_y_bytes
+    hmac0 = HMAC.new(key=k_HMAC_bytes, msg=temp, digestmod=SHA256)
+    OTKReg(i, OTK0_pub.x, OTK0_pub.y, hmac0.hexdigest())
