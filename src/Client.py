@@ -1,8 +1,9 @@
 import math
 from ecpy.curves import Curve,Point
-from Crypto.Hash import SHA3_256
+from Crypto.Hash import SHA3_256, SHA256
 import requests
 from Crypto.Random import random
+from Crypto.Hash import  HMAC
 
 API_URL = 'http://10.92.55.4:5000'
 
@@ -219,9 +220,68 @@ T = SPKey_Pr * SPKey_Pub
 t_byte_x = T.x.to_bytes(32, 'big')
 t_byte_y = T.y.to_bytes(32, 'big')
 curiosity_byte = b'CuriosityIsTheHMACKeyToCreativity'
-U = t_byte_x + t_byte_y + curiosity_byte
+U = curiosity_byte + t_byte_y + t_byte_x 
 
-k_hmac = SHA3_256.SHA3_256_Hash(U, True)
-k_hmac = SHA3_256.SHA3_256_Hash.digest(k_hmac)
+hasher = SHA3_256.new()
+hasher.update(U)
+k_hmac = str(hasher.hexdigest())
+
 
 #registration of otk
+'''
+# Select random secret sA where 0 < sA < n-1
+sA0 = random.randint(1, order-1)
+print("sA1 =",sA0)
+
+sA1 = random.randint(1, order-1)
+print("sA1 =",sA1)
+
+sA2 = random.randint(1, order-1)
+print("sA2 =",sA2)
+
+sA3 = random.randint(1, order-1)
+print("sA3 =",sA3)
+
+sA4 = random.randint(1, order-1)
+print("sA4 =",sA4)
+
+sA5 = random.randint(1, order-1)
+print("sA5 =",sA5)
+
+sA6 = random.randint(1, order-1)
+print("sA6 =",sA6)
+
+sA7 = random.randint(1, order-1)
+print("sA1 =",sA7)
+
+sA8 = random.randint(1, order-1)
+print("sA1 =",sA8)
+
+sA9 = random.randint(1, order-1)
+print("sA1 =",sA9)
+
+
+'''
+def otk_cal (k_hmac, okt):
+    h_temp = HMAC.new(k_hmac, digestmod=SHA256)
+    okt_x_y = okt.x.to_bytes(32, 'big') + okt.y.to_bytes(32, 'big')
+    h_temp.update(okt_x_y)
+    return h_temp.hexdigest()
+
+otk_priv_arr = []
+
+for i in range(0,10):
+
+    otk_priv = random.randint(0, order-1) #otk_priv is private key
+    print("otk_priv_ ", i ,":", otk_priv)
+
+    otk_pub = otk_priv * generator #otk_pub is public key
+    print("otk_pub_ ", i ,":",otk_pub)
+
+    a = OTKReg(i,otk_pub.x,otk_pub.y,otk_cal(k_hmac, otk_pub))
+
+    print("Result :", a)
+    print("")
+    otk_priv_arr.append(otk_priv)
+
+print(otk_priv_arr)
