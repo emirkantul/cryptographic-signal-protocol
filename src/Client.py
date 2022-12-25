@@ -1,9 +1,21 @@
-import math
+# Melike Soyturk 28129
+# Emir Kantul 27041
+# CS411 Project Phase I
+
 from ecpy.curves import Curve,Point
 from Crypto.Hash import SHA3_256, SHA256
 import requests
 from Crypto.Random import random
 from Crypto.Hash import  HMAC
+
+# NOTE: 
+# Parts for key generation and registration are commented to 
+# prevent repeated key generation and request to servers. After
+# getting appropriate results, static variables used and rest
+# is commented. For full functionality and test those sections
+# should be uncommented.
+    
+# Also all methods were tried with the other member's student id as well
 
 API_URL = 'http://10.92.55.4:5000'
 
