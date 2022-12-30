@@ -8,7 +8,8 @@ from Crypto.Hash import SHA3_256, SHA256
 import requests
 from Crypto.Random import random
 from Crypto.Hash import  HMAC
-    
+from Crypto.Cipher import AES
+
 API_URL = 'http://10.92.52.255:5000/'
 
 stuIDB = 2014
@@ -72,162 +73,6 @@ def ResetOTK(h,s):
     response = requests.delete('{}/{}'.format(API_URL, "ResetOTK"), json = mes)		
     if((response.ok) == False): print(response.json())
 
-# Get the curve, field, order and generator
-curve = Curve.get_curve('secp256k1')
-field = curve.field
-order = curve.order
-generator = curve.generator
-
-# Signature Generator
-def generate_signature(msg, sA, generator, order):
-    k = random.randint(1, order-2)
-    R = k * generator
-    r = (R.x) % order
-    r_bytes = r.to_bytes(32, 'big')
-    h = SHA3_256.SHA3_256_Hash(r_bytes + msg, True)
-    h = SHA3_256.SHA3_256_Hash.digest(h)
-    h = int.from_bytes(h,"big") % order
-    s = (k + (sA * h)) % order
-
-    print("\nSignature h:", h)
-    print("Signature s:", s)
-    
-    return h, s
-
-# Private key generator
-def generate_private_key(order, generator):
-    print("\nGenerating private and public keys..")
-    # Select random secret sA where 0 < sA < n-1
-    sA = random.randint(1, order-1)
-    print("sA =",sA)
-
-    # create long term public key
-    sA_pub = sA*generator
-    print("sA_pub =",sA_pub)
-    print("sA_pub.x =",sA_pub.x)
-    print("sA_pub.y =",sA_pub.y)
-
-    return sA, sA_pub
-
-def verify_signature(h, s, qA, msg, order, generator):
-    V = s * generator - h * qA
-    v = V.x % order
-
-    v_byte = v.to_bytes(32, 'big')
-
-    h2 = SHA3_256.SHA3_256_Hash(v_byte+ msg, True)
-    h2 = SHA3_256.SHA3_256_Hash.digest(h2)
-    h2 = int.from_bytes(h2,"big")
-    h2 = h2 % order
-    print(h2)
-
-    if (h == h2):
-        print("Signature verified!") #verified
-    else:
-        print("Signature not verified!") #not verified
-
-
-# Server's identity public key 
-IKey_Ser = Point(0xce1a69ecc226f9e667856ce37a44e50dbea3d58e3558078baee8fe5e017a556d , 0x13ddaf97158206b1d80258d7f6a6880e7aaf13180e060bb1e94174e419a4a093, curve)
-print("Server Public Identity Key:", IKey_Ser)
-
-# Client's identity public key and private key
-IKey_Pr = 54711695610845891711285415678093810504562500554097973349097378295447174968645
-IKey_Pub = Point(0xeaa0b601668eba6177eb13991f611a8a3017fe64ca9635fc2b8154d3f78e1954 , 0x576cc7f8888c1291a324704a695539cf8e4f86634a4527b69cc27dcb4109c424, curve)
-print("\nClient Public Identity Key:", IKey_Pub)
-print("Client Private Identity Key:", IKey_Pr)
-
-'''
-IKey_Pr, IKey_Pub = generate_private_key(order, generator)
-'''
-
-
-'''
-IK Registration signature generation 
-stuID_bytes = stuID.to_bytes((stuID.bit_length() +7)//8,byteorder="big")
-h, s = generate_signature(msg=stuID_bytes, sA=IKey_Pr, generator=generator, order=order)
-IKRegReq(h, s, IKey_Pub.x, IKey_Pub.y)
-'''
-code = 103096
-
-'''
-# IK Registration verification 
-IKRegVerify(code=code, stuID=stuID, IKey_Pub=IKey_Pub)
-'''
-rcode = 368095
-
-
-# Client Signed Pre-key
-SPKey_Pr = 24373054577699454663564151012111011615866473942778748787713915925292914841793
-SPKey_Pub = Point(int("0xc763f5b6ca6fc8fb746d204b99fd47df2a79056d668dc613894c55bdff47398d",base=16) , int("0x5b7cf45b7ee2d189189fa38d47a6cbb2b986bf539620b2695840711bc32c9333",base = 16), curve=curve)
-print("\nSigned Pre-key Private:", SPKey_Pr)
-print("Signed Pre-key Public:",SPKey_Pub)
-
-'''
-# Signed Pre-key generation
-SPKey_Pr, SPKey_pub = generate_private_key(order, generator)
-'''
-
-
-'''
-# SPK Registration signature generation
-msg = SPKey_Pub.x.to_bytes((SPKey_Pub.x.bit_length()+7)//8,byteorder="big") + SPKey_Pub.y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
-h, s = generate_signature(msg=msg, sA=IKey_Pr, generator=generator, order=order)
-resp_x, resp_y, resp_h, resp_s  = SPKReg(h, s, SPKey_Pub.x, SPKey_Pub.y)
-
-# Signature Verification
-resp_x_bytes = resp_x.to_bytes((resp_x.bit_length() + 7) // 8, byteorder='big')
-resp_y_bytes = resp_y.to_bytes((resp_y.bit_length() + 7) // 8, byteorder='big')
-resp_h_bytes = resp_h.to_bytes((resp_h.bit_length() + 7) // 8, byteorder='big')
-resp_s_bytes = resp_s.to_bytes((resp_s.bit_length() + 7) // 8, byteorder='big')
-resp_msg = resp_x_bytes + resp_y_bytes
-SPK_Pub_Server = Point(resp_x, resp_y, curve)
-msg = SPKey_Pub.x.to_bytes((resp_x.bit_length()+7)//8,byteorder="big") + resp_y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
-verify_signature(h=resp_h, s=resp_s, qA=IKey_Ser, msg=resp_msg, order=order, generator=generator)
-msg = SPKey_Pub.x.to_bytes((resp_x.bit_length()+7)//8,byteorder="big") + resp_y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
-verify_signature(resp_h, resp_s, SPKey_Pub, msg, order, generator)
-'''
-
-SPK_Pub_Server = Point(0x7d38f788a09a94b29ef81b95e812816889e9d2fcbbd51909c94cbda2e9bcc736 , 0x8585933fcc79add8ab5bb6a824e5170b68d82c12a543b1576610dd4210775333, curve=curve)
-print("Server Point:", SPK_Pub_Server)
-
-
-# Generating HMAC Key
-T = SPKey_Pr * SPK_Pub_Server
-Tx_bytes = T.x.to_bytes((T.x.bit_length() + 7) // 8, byteorder='big')
-Ty_bytes = T.y.to_bytes((T.y.bit_length() + 7) // 8, byteorder='big')
-U = b'CuriosityIsTheHMACKeyToCreativity' + Ty_bytes + Tx_bytes
-hashVal3 = SHA3_256.new(U)
-k_HMAC = int.from_bytes(hashVal3.digest(), 'big') % order
-k_HMAC_bytes = k_HMAC.to_bytes((k_HMAC.bit_length() + 7) // 8, byteorder='big')
-print("\nT: ({} , {})".format(hex(T.x), hex(T.y)))
-print("U:",U)
-print("HMAC key:", k_HMAC_bytes)
-
-
-# Create and register OTKs
-for i in range(10):
-    OTK_pr, OTK0_pub = generate_private_key(order=order, generator=generator)
-    print("\n", str(i) + "th OTK.")
-    print("OTK private:", OTK_pr)
-    print("OTK public:", OTK0_pub)
-    OTK0_x_bytes = OTK0_pub.x.to_bytes((OTK0_pub.x.bit_length() + 7) // 8, byteorder='big')
-    OTK0_y_bytes = OTK0_pub.y.to_bytes((OTK0_pub.y.bit_length() + 7) // 8, byteorder='big')
-    temp = OTK0_x_bytes + OTK0_y_bytes
-    hmac0 = HMAC.new(key=k_HMAC_bytes, msg=temp, digestmod=SHA256)
-    OTKReg(i, OTK0_pub.x, OTK0_pub.y, hmac0.hexdigest())
-
-#####################################################################################
-###################################### PHASE 2 ######################################
-#####################################################################################
-
-# phase 2 helpers
-
-API_URL = 'http://10.92.52.255:5000/'
-
-stuID = 26045
-stuIDB = 2014
-
 def egcd(a, b):
     x,y, u,v = 0,1, 1,0
     while a != 0:
@@ -243,10 +88,6 @@ def modinv(a, m):
         return None  # modular inverse does not exist
     else:
         return x % m
-
-def Setup():
-    E = Curve.get_curve('secp256k1')
-    return E
 
 def KeyGen(E):
     n = E.order
@@ -309,100 +150,156 @@ def Checker(stuID, stuIDB, msgID, decmsg):
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "Checker"), json = mes)	
 
+# Get the curve, field, order and generator
+curve = Curve.get_curve('secp256k1')
+field = curve.field
+order = curve.order
+generator = curve.generator
 
-# OTK data
-otk_private = [81661962775791531255393590218032810348611196057800092950972910673728483913293, 52808665550935137250118206376573576203141304345939680267257950392200540207015, 28886528209940086927211574720079351376569346129303597582466848064924258131196, 11114466964466141026367702073664155613887604275985718533928007399121172719121, 17166357728138738026932544999677587823688912721806684576840951659670965088038, 89828764614649288349946443494126545878918699713795459712736909795019648787538, 48168878674606644491705808962129225172098876787988203995044137678806445123558, 91179985255603002478337425498383773831413918717804015885447630247048388959701, 82924893139980026608916710627158509866282852529554964410349276866878225755082, 90870193415124165058039276172179735704530307717037153962822467285881689168350]
+# Server's identity public key 
+IKey_Ser = Point(0xce1a69ecc226f9e667856ce37a44e50dbea3d58e3558078baee8fe5e017a556d , 0x13ddaf97158206b1d80258d7f6a6880e7aaf13180e060bb1e94174e419a4a093, curve)
+print("Server Public Identity Key:", IKey_Ser)
 
-# Signing my stuID with my private IK in order to get messages from the server:
-k = random.randint(1, order - 2)
-R = k * generator
-r = R.x % order
+# Client's identity public key and private key
+IKey_Pr = 54711695610845891711285415678093810504562500554097973349097378295447174968645
+IKey_Pub = Point(0xeaa0b601668eba6177eb13991f611a8a3017fe64ca9635fc2b8154d3f78e1954 , 0x576cc7f8888c1291a324704a695539cf8e4f86634a4527b69cc27dcb4109c424, curve)
+print("\nClient Public Identity Key:", IKey_Pub)
+print("Client Private Identity Key:", IKey_Pr)
 
-r_byte_array = r.to_bytes((r.bit_length() +7)//8, byteorder = 'big')
-m_byte_array = stuID.to_bytes((stuID.bit_length() +7)//8, byteorder = 'big')
-r_m = r_byte_array + m_byte_array #concatenation of r and m where m is stuID
+code = 103096
 
-h = SHA3_256.new(r_m)
-h = int.from_bytes(h.digest(), byteorder='big') % order
+rcode = 368095
 
-s = (k - (IKey_Pr * h)) % order
-print("s:", s)
-print("h:", h)
+stuID_bytes = stuID.to_bytes((stuID.bit_length() +7)//8,byteorder="big")
 
+# Client Signed Pre-key
+SPKey_Pr = 7148617522993900837421013426385682407108504206372655816402300215068244918645
+SPKey_Pub = Point(0xc313d1e58cbc227bdfa626a4fb3b2974c356ef1268a7c81128b370bfb70cd6ed , 0x3a06831a7df557e7c4b07953bf3d0b54c2a4947ece31d38a14a2eb9035fb0310, curve=curve)
+SPK_Pub_Server = Point(0xbc0360774a6ae550633c37ddde5f38a0497a7a1af5f7a60bb532aaf28957344b , 0x667bc03d5faafd1d9ad4c44507ec00871ae35a63d688732c44710918ca67e5e9, curve=curve)
+
+print("\nSigned Pre-key Private:", SPKey_Pr)
+print("Signed Pre-key Public:",SPKey_Pub)
+print("Server Point:", SPK_Pub_Server)
+
+
+''' reset, generate and register spk
+h, s = SignGen(stuID_bytes, curve, IKey_Pr)
+ResetSPK(h, s)
+SPKey_Pr, SPKey_Pub = KeyGen(curve)
+print(SPKey_Pr, SPKey_Pub)
+msg = SPKey_Pub.x.to_bytes((SPKey_Pub.x.bit_length()+7)//8,byteorder="big") + SPKey_Pub.y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
+h, s = SignGen(msg, curve, IKey_Pr)
+resp_x, resp_y, resp_h, resp_s  = SPKReg(h, s, SPKey_Pub.x, SPKey_Pub.y)
+resp_x_bytes = resp_x.to_bytes((resp_x.bit_length() + 7) // 8, byteorder='big')
+resp_y_bytes = resp_y.to_bytes((resp_y.bit_length() + 7) // 8, byteorder='big')
+resp_h_bytes = resp_h.to_bytes((resp_h.bit_length() + 7) // 8, byteorder='big')
+resp_s_bytes = resp_s.to_bytes((resp_s.bit_length() + 7) // 8, byteorder='big')
+SPK_Pub_Server = Point(resp_x, resp_y, curve)
+print("Server Point:", SPK_Pub_Server)
+msg = SPKey_Pub.x.to_bytes((resp_x.bit_length()+7)//8,byteorder="big") + resp_y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
+SignVer(resp_x_bytes + resp_y_bytes, resp_h, resp_s, curve, IKey_Ser)
+SignVer(resp_x_bytes + resp_y_bytes, resp_h, resp_s, curve, SPKey_Pub)
+'''
+
+
+''' reset, generate and register otk 
+h, s = SignGen(stuID_bytes, curve, IKey_Pr)
+ResetOTK(h, s)
+T = SPKey_Pr * SPK_Pub_Server
+Tx_bytes = T.x.to_bytes((T.x.bit_length() + 7) // 8, byteorder='big')
+Ty_bytes = T.y.to_bytes((T.y.bit_length() + 7) // 8, byteorder='big')
+U = b'CuriosityIsTheHMACKeyToCreativity' + Ty_bytes + Tx_bytes
+k_hmac = int.from_bytes(SHA3_256.new(U).digest(), 'big') % order
+k_HMAC_bytes = k_hmac.to_bytes((k_hmac.bit_length() + 7) // 8, byteorder='big')
+for i in range(10):
+    OTK_pr, OTK0_pub = KeyGen(curve)
+    print("\n", str(i) + "th OTK.")
+    print("OTK private:", OTK_pr)
+    print("OTK public:", OTK0_pub)
+    OTK0_x_bytes = OTK0_pub.x.to_bytes((OTK0_pub.x.bit_length() + 7) // 8, byteorder='big')
+    OTK0_y_bytes = OTK0_pub.y.to_bytes((OTK0_pub.y.bit_length() + 7) // 8, byteorder='big')
+    hmac0 = HMAC.new(key=k_HMAC_bytes, msg=OTK0_x_bytes + OTK0_y_bytes, digestmod=SHA256)
+    OTKReg(i, OTK0_pub.x, OTK0_pub.y, hmac0.hexdigest())
+'''
+
+# One-time Pre-Key
+otks = [13167037760740671140990449358459659422787549909046292082689766791367774274103, 49074722223096510818794301623063439196126172231975406962576566370264994940755, 109193606621385610033924164924357328326510515039599667080037936911717042663680, 12851821767966603728446452972861951635820252187324447237533899735058956495068, 17133614516402517586196656961873571292403374292198954133874529380616771250607, 86183370604684194693656179218282742353253136442466143641850966530955737395039, 97916912925244259371666849769647438459117947622458372711824170297813704271261, 89391436421908655670061523375496840350297942660286415005713215119160832830742, 34659092723109736398157206080649439968359442116039971958727533919469528315283, 17871196282393870547677902637948970410031290577887360821746204405420314797400]
+print("10 One-time Pre-Key:", otks)
+
+# get messages from server
+print("Requesting server to send pseudo messages..")
+h, s = SignGen(stuID_bytes, curve, IKey_Pr)
 PseudoSendMsg(h,s)
 
-# requesting messages from the server:
-otkID_array = []
-msgID_array = []
-msg_array = []
+# request 5 mesages from server:
+print("Requesting 5 messages from server..")
+messages = []
 for i in range(5):
     stuIDB, otkID, msgID, msg, ek_x, ek_y = ReqMsg(h,s)
-    msg_array.append(msg)
-    otkID_array.append(otkID)
-    msgID_array.append(msgID)
+    messages.append({
+        'stuIDB': stuIDB,
+        'otkID': otkID,
+        'msgID': msgID,
+        'msg': msg,
+        'ek_x': ek_x,
+        'ek_y': ek_y,
+    })
 
-first_iteration = True
-counter = 0
-for message in msg_array:
-    message_byte_array = message.to_bytes((message.bit_length() +7)//8, byteorder = 'big')
-    
-    # hmac of the message
-    message_HMAC = message_byte_array[len(message_byte_array)-32:]
-    #print(message_HMAC) 
+# decrypt all messages given 
+# messages: array of messages
+def decrypt_messages(messages, otks, stuID):
+    decrypted_messages = {}
+    kdf_next = None
 
-    # nonce and the ciphertext
-    message_with_nonce = message_byte_array[:len(message_byte_array)-32]
-    #print(message_with_nonce)
+    for message in messages:
+        msg = message["msg"].to_bytes((message["msg"].bit_length() +7)//8, byteorder = 'big')
+        
+        msg_hmac = msg[len(msg)-32:]               # hmac of the message
+        message_with_nonce = msg[:len(msg)-32]     # message with nonce
+        ciphertext = msg[8:len(msg)-32]            # nonce removed
 
-    # ciphertext
-    ciphertext = message_byte_array[8:len(message_byte_array)-32]
-    #print(ciphertext)
+        # generate session key if first iteration
+        if kdf_next is None:
+            ek_point = Point(message['ek_x'], message['ek_y'], curve = curve)
+            T = otks[otkID] * ek_point
+            U = T.x.to_bytes((T.x.bit_length() +7)//8, byteorder = 'big') + T.y.to_bytes((T.y.bit_length() +7)//8, byteorder = 'big') + b'ToBeOrNotToBe'
+            k_s = SHA3_256.new(U)
+            kdf_next = k_s
+        else:
+            kdf_next = SHA3_256.new(k_enc.digest() + k_hmac.digest() + b'MayTheForceBeWithYou')
 
+        k_enc = SHA3_256.new(kdf_next.digest() + b'YouTalkingToMe')
+        k_hmac = SHA3_256.new(kdf_next.digest() + k_enc.digest() + b'YouCannotHandleTheTruth')
 
-    # _session key generation start_
-    EK_B_point = Point(ek_x, ek_y, curve = curve)
-    T = otk_private[otkID] * EK_B_point
-    T_x = T.x
-    T_y = T.y
+        # create hmac from ciphertext
+        hmac = HMAC.new(k_hmac.digest(), ciphertext, digestmod=SHA256).digest()
 
-    T_x_byte_array = T_x.to_bytes((T_x.bit_length() +7)//8, byteorder = 'big')
-    T_y_byte_array = T_y.to_bytes((T_y.bit_length() +7)//8, byteorder = 'big')
-    U = T_x_byte_array + T_y_byte_array + b'ToBeOrNotToBe'
+        # checking MAC values
+        if(hmac == msg_hmac):
+            print("HMAC verified")
+            # decrypt message
+            cipher = AES.new(k_enc.digest(), AES.MODE_CTR, nonce = message_with_nonce[0:8])
+            dtext = cipher.decrypt(message_with_nonce[8:])
+            decrypted_message = dtext.decode('utf-8')
+            print("Decrypted message:", decrypted_message)
+            Checker(stuID, message["stuIDB"], message["msgID"], decrypted_message)
+            decrypted_messages[message["msgID"]] = decrypted_message
 
-    K_S = SHA3_256.new(U)
-    # _session key generation end_
+        else: 
+            print("HMAC not verified")
+            Checker(stuID, message["stuIDB"], message["msgID"], 'INVALIDHMAC')
+            decrypted_messages[message["msgID"]] = 'INVALIDHMAC'
 
-    # _key derivation start_
-    if(first_iteration):
-        K_KDF = K_S
-        first_iteration = False
-    else:
-        K_KDF = SHA3_256.new(K_ENC.digest() + K_HMAC.digest() + b'MayTheForceBeWithYou')
+    return decrypted_messages
 
-    K_ENC = SHA3_256.new(K_KDF.digest() + b'YouTalkingToMe')
-    K_HMAC = SHA3_256.new(K_KDF.digest() + K_ENC.digest() + b'YouCannotHandleTheTruth')
-    # _key derivation end_
+print("Decrypting messages from server")
+decrypted_messages = decrypt_messages(messages=messages, otks=otks, stuID=stuID)
 
-    # obtaining hmac from ciphertext
-    hmac = HMAC.new(K_HMAC.digest(), ciphertext, digestmod=SHA256)
-    hmac = hmac.digest()
+# display final message block
+print("Retrieving deleted messages from server")
+h, s = SignGen(stuID_bytes, curve, IKey_Pr)
+deleted_message_ids = ReqDelMsg(h,s)
 
-    # checking MAC values
-    if(hmac == message_HMAC):
-        print("HMAC is verified")
-
-        # dencryption of the message
-        cipher = AES.new(K_ENC.digest(), AES.MODE_CTR, nonce = message_with_nonce[0:8])
-        dtext = cipher.decrypt(message_with_nonce[8:])
-        decrypted_message = dtext.decode('utf-8')
-
-        print("Decrypted message:", decrypted_message)
-
-        # cheking decrypted message
-        Checker(stuID, stuIDB, msgID_array[counter], decrypted_message)
-    else: 
-        print("HMAC is not verified")
-        Checker(stuID, stuIDB, msgID_array[counter], 'INVALIDHMAC')
-
-    counter = counter + 1
-
+print("Deleted messages:")
+for id in deleted_message_ids:
+    print(decrypted_messages[id])
