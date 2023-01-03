@@ -1,0 +1,108 @@
+Start of the main functions of phase 3 ...
+++++++++++++++++++++++++++++++++++++++++++++
+
+Now I want to send messages to my friend. Her id is 11111. Yes she is also imaginary
+Signing The stuIDB of party B with my private IK
+Requesting party B's OTK ...
+{'KEYID': 6, 'OTK.X': 27049740518114339038098408401280818658574610794756662037394497321083290409686, 'OTK.Y': 105993661942822520963041371854133868708596558083805260363113727529765683349389}
+{'KEYID': 6, 'OTK.X': 27049740518114339038098408401280818658574610794756662037394497321083290409686, 'OTK.Y': 105993661942822520963041371854133868708596558083805260363113727529765683349389}
+++++++++++++++++++++++++++++++++++++++++++++
+The other party's OTK public key is acquired from the server ...
+Generating Ephemeral key
+The message I want to send: Dormammu, I have come to bargain
+Generating the KDF chain for the encryption and the MAC value generation
+Generating session key using my EK and my friends Public OTK/ Phase 3...
+
+++++++++++++++++++++++++++++++++++++++++++++
+Sending the message to the server, so it would deliver it to my friend whenever she is active ...
+Sending message is:  {'IDA': 26045, 'IDB': 18007, 'OTKID': 6, 'MSGID': 1, 'MSG': 65690847889312574284245513828770254676961975070235797590203111683161993445336333012668536577669260234693332291275327993240854715596909479820030939916537802866285982876483772, 'EK.X': 72259030775687357538951534658873051778809149368817068184631096137530320835981, 'EK.Y': 82839640047720681102386318376470698631656127684253830964576001332804397580611}
+Your message sent succesfully
+
+Sending another message
+The message I want to send: I've come to talk with you again
+Generating the KDF chain for the encryption and the MAC value generation
+Generating session key 
+
+++++++++++++++++++++++++++++++++++++++++++++
+Sending the message to the server, so it would deliver it to pseudo-client/user whenever it is active ...
+Sending message is:  {'IDA': 26045, 'IDB': 18007, 'OTKID': 6, 'MSGID': 2, 'MSG': 236499681081412815005333760884437364313925929752063895313140491969020708728106247650443086219948937116425045433402523689689498213302042287846397760552701194882957546410203433, 'EK.X': 79837714836144643737883926309113137519078316765966371061164160001662076236178, 'EK.Y': 37720116874281424038234229205545358428382354164881025700843778057260352927274}
+Your message sent succesfully
+
+++++++++++++++++++++++++++++++++++++++++++++
+Now I'll encrypt the messages I retrieved initially from the server and send it to pseudo-client (26045)
+I'll send them in a single block. But order of the messages should be considered
+
+Signing The stuIDB of party B with my private IK
+Requesting party B's OTK ...
+{'KEYID': 7, 'OTK.X': 40711099456598039077390747149439774262520705824321768213963550626468144074701, 'OTK.Y': 76759587652714678025242220180783811800143161529490856819407098028934530644726}
+{'KEYID': 7, 'OTK.X': 40711099456598039077390747149439774262520705824321768213963550626468144074701, 'OTK.Y': 76759587652714678025242220180783811800143161529490856819407098028934530644726}
+The other party's OTK public key is acquired from the server ...
+
+++++++++++++++++++++++++++++++++++++++++++++
+Get the message from the list of received messages ...
+
+++++++++++++++++++++++++++++++++++++++++++++
+Generating an ephemeral key 
+Private part of my EK:  58670495125683248902180316406583634226211125175197029407267386019618228180833
+Generating the KDF chain for the encryption and the MAC value generation
+Generating session key using my EK and my friend's Public OTK for the message with id  1
+
+Sending the message to the server, so it would deliver it to pseudo-client/user whenever it is active ...
+Sending message is:  {'IDA': 26045, 'IDB': 18007, 'OTKID': 7, 'MSGID': 1, 'MSG': 33489587689385286237736156861653900944569092355568768478091017624341284283433422267994128594986751981906621258361529915046909737637534345405469710226952139932194748634853153065868343349213900274895210, 'EK.X': 55261697361294960607971095904127852546178690083631418864710400820569187922977, 'EK.Y': 59618155717747078053886739713204667858181087635651719731371375632042387435118}
+Your message sent succesfully
+
+++++++++++++++++++++++++++++++++++++++++++++
+Generating an ephemeral key 
+Private part of my EK:  58670495125683248902180316406583634226211125175197029407267386019618228180833
+Generating the KDF chain for the encryption and the MAC value generation
+Generating session key using my EK and my friend's Public OTK for the message with id  2
+
+Sending the message to the server, so it would deliver it to pseudo-client/user whenever it is active ...
+Sending message is:  {'IDA': 26045, 'IDB': 18007, 'OTKID': 7, 'MSGID': 2, 'MSG': 20454849607245515491029792182004613860539367192374992937680237573620429729811372808978076053711749937728115934552901529500701635979669344104301668127147653709235864814494824359897589470105241343771513, 'EK.X': 55261697361294960607971095904127852546178690083631418864710400820569187922977, 'EK.Y': 59618155717747078053886739713204667858181087635651719731371375632042387435118}
+Your message sent succesfully
+
+++++++++++++++++++++++++++++++++++++++++++++
+Generating an ephemeral key 
+Private part of my EK:  58670495125683248902180316406583634226211125175197029407267386019618228180833
+Generating the KDF chain for the encryption and the MAC value generation
+Generating session key using my EK and my friend's Public OTK for the message with id  3
+
+Sending the message to the server, so it would deliver it to pseudo-client/user whenever it is active ...
+Sending message is:  {'IDA': 26045, 'IDB': 18007, 'OTKID': 7, 'MSGID': 3, 'MSG': 19381298778578168767482424140423906837896888205850121553383292577744264689542516688751285462217257314257228382798423829919314516447879712796934744574386645563736378715902139219644947903402609995488700, 'EK.X': 55261697361294960607971095904127852546178690083631418864710400820569187922977, 'EK.Y': 59618155717747078053886739713204667858181087635651719731371375632042387435118}
+Your message sent succesfully
+
+++++++++++++++++++++++++++++++++++++++++++++
+Generating an ephemeral key 
+Private part of my EK:  58670495125683248902180316406583634226211125175197029407267386019618228180833
+Generating the KDF chain for the encryption and the MAC value generation
+Generating session key using my EK and my friend's Public OTK for the message with id  4
+
+Sending the message to the server, so it would deliver it to pseudo-client/user whenever it is active ...
+Sending message is:  {'IDA': 26045, 'IDB': 18007, 'OTKID': 7, 'MSGID': 4, 'MSG': 50522877222615249815618261544651530968536713124541455229864100157195326816718571184453039321912322862859166847612385157820745911492460096729368689154484420348082361897990276277471329860866897685236323, 'EK.X': 55261697361294960607971095904127852546178690083631418864710400820569187922977, 'EK.Y': 59618155717747078053886739713204667858181087635651719731371375632042387435118}
+Your message sent succesfully
+
+++++++++++++++++++++++++++++++++++++++++++++
+Generating an ephemeral key 
+Private part of my EK:  58670495125683248902180316406583634226211125175197029407267386019618228180833
+Generating the KDF chain for the encryption and the MAC value generation
+Generating session key using my EK and my friend's Public OTK for the message with id  5
+
+Sending the message to the server, so it would deliver it to pseudo-client/user whenever it is active ...
+Sending message is:  {'IDA': 26045, 'IDB': 18007, 'OTKID': 7, 'MSGID': 5, 'MSG': 6681697498781197580022178652652337382956511470417573377375940171904835097275855873785856174907576193359762491453635687694118793715599299131492839030278214862610325328989160941462782384013971402015436, 'EK.X': 55261697361294960607971095904127852546178690083631418864710400820569187922977, 'EK.Y': 59618155717747078053886739713204667858181087635651719731371375632042387435118}
+Your message sent succesfully
+
+++++++++++++++++++++++++++++++++++++++++++++
+Checking the status of the inbox ...
+Sending message is:  {'ID': 26045, 'H': 50762453969891123696460165823358231242205786707487403821042852241060862219831, 'S': 20238289441285713641015055654318252311097540028031421014233395969063251461574}
+{'numMSG': 0, 'numOTK': 9, 'StatusMSG': 'You have 0 unread messages in your mailbox.\n You have 9 OTKs left.'}
+You have 0 unread messages in your mailbox.
+You have 9 OTKs left.
+ 
+ ++++++++++++++++++++++++++++++++++++++++++++
+Checking the status of the inbox ...
+Sending message is:  {'ID': 18007, 'H': 23924298621306528403413630652758244820433337070249532990148090898727481556044, 'S': 41810241279788852844376186296811487750102121270007719148268632711113380381233}
+{'numMSG': 0, 'numOTK': 1, 'StatusMSG': 'You have 1 unread messages in your mailbox.\n You have only 1 OTK left. Please register new OTKs'}
+You have 1 unread messages in your mailbox.
+You have only 1 OTK left. Please register new OTKs
+
+

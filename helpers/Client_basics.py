@@ -18,8 +18,7 @@ import json
 
 API_URL = 'http://10.92.52.255:5000/'
 
-stuID = 26045
-stuIDB = 2014
+
 
 def egcd(a, b):
     x,y, u,v = 0,1, 1,0
@@ -38,6 +37,7 @@ def modinv(a, m):
         return x % m
 
 def Setup():
+    global E
     E = Curve.get_curve('secp256k1')
     return E
 
@@ -69,35 +69,36 @@ def SignVer(message, h, s, E, QA):
     else:
         return False
 
-
+stuID = 26045
+stuIDB = 18007
 #server's Identitiy public key
 IKey_Ser = Point(93223115898197558905062012489877327981787036929201444813217704012422483432813 , 8985629203225767185464920094198364255740987346743912071843303975587695337619, curve)
-
+print("In signature generation I fixed the random variable to 1748178 so that you can re-generate if you want")
 def IKRegReq(h,s,x,y):
-    mes = {'ID':stuID, 'H': h, 'S': s, 'IKPUB.X': x, 'IKPUB.Y': y}
+    mes = {'ID': stuID, 'H': h, 'S': s, 'IKPUB.X': x, 'IKPUB.Y': y}
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "IKRegReq"), json = mes)		
     if((response.ok) == False): print(response.json())
 
 def IKRegVerify(code):
-    mes = {'ID':stuID, 'CODE': code}
+    mes = {'ID': stuID, 'CODE': code}
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "IKRegVerif"), json = mes)
     if((response.ok) == False): raise Exception(response.json())
     print(response.json())
 
 def SPKReg(h,s,x,y):
-    mes = {'ID':stuID, 'H': h, 'S': s, 'SPKPUB.X': x, 'SPKPUB.Y': y}
+    mes = {'ID': stuID, 'H': h, 'S': s, 'SPKPUB.X': x, 'SPKPUB.Y': y}
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "SPKReg"), json = mes)		
-    if((response.ok) == False): 
+    if(response.ok == False):
         print(response.json())
     else: 
         res = response.json()
         return res['SPKPUB.X'], res['SPKPUB.Y'], res['H'], res['S']
 
 def OTKReg(keyID,x,y,hmac):
-    mes = {'ID':stuID, 'KEYID': keyID, 'OTKI.X': x, 'OTKI.Y': y, 'HMACI': hmac}
+    mes = {'ID': stuID, 'KEYID': keyID, 'OTKI.X': x, 'OTKI.Y': y, 'HMACI': hmac}
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "OTKReg"), json = mes)		
     print(response.json())
@@ -106,7 +107,7 @@ def OTKReg(keyID,x,y,hmac):
 
 
 def ResetIK(rcode):
-    mes = {'ID':stuID, 'RCODE': rcode}
+    mes = {'ID': stuID, 'RCODE': rcode}
     print("Sending message is: ", mes)
     response = requests.delete('{}/{}'.format(API_URL, "ResetIK"), json = mes)		
     print(response.json())
@@ -114,7 +115,7 @@ def ResetIK(rcode):
     else: return True
 
 def ResetSPK(h,s):
-    mes = {'ID':stuID, 'H': h, 'S': s}
+    mes = {'ID': stuID, 'H': h, 'S': s}
     print("Sending message is: ", mes)
     response = requests.delete('{}/{}'.format(API_URL, "ResetSPK"), json = mes)		
     print(response.json())
@@ -122,43 +123,66 @@ def ResetSPK(h,s):
     else: return True
 
 def ResetOTK(h,s):
-    mes = {'ID':stuID, 'H': h, 'S': s}
+    mes = {'ID': stuID, 'H': h, 'S': s}
     print("Sending message is: ", mes)
-    response = requests.delete('{}/{}'.format(API_URL, "ResetOTK"), json = mes)		
+    response = requests.delete('{}/{}'.format(API_URL, "ResetOTK"), json=mes)
     print(response.json())
 
-############## The new functions of phase 2 ###############
-
-#Pseudo-client will send you 5 messages to your inbox via server when you call this function
-def PseudoSendMsg(h,s):
-    mes = {'ID':stuID, 'H': h, 'S': s}
+def PseudoSendMsgPH3(h,s):
+    mes = {'ID': stuID, 'H': h, 'S': s}
     print("Sending message is: ", mes)
-    response = requests.put('{}/{}'.format(API_URL, "PseudoSendMsg"), json = mes)		
+    response = requests.put('{}/{}'.format(API_URL, "PseudoSendMsgPH3"), json=mes)
     print(response.json())
 
-#Get your messages. server will send 1 message from your inbox
 def ReqMsg(h,s):
-    mes = {'ID':stuID, 'H': h, 'S': s}
+    mes = {'ID': stuID, 'H': h, 'S': s}
     print("Sending message is: ", mes)
-    response = requests.get('{}/{}'.format(API_URL, "ReqMsg"), json = mes)	
+    response = requests.get('{}/{}'.format(API_URL, "ReqMsg"), json=mes)
     print(response.json())	
     if((response.ok) == True): 
         res = response.json()
         return res["IDB"], res["OTKID"], res["MSGID"], res["MSG"], res["EK.X"], res["EK.Y"]
 
-#Get the list of the deleted messages' ids.
 def ReqDelMsg(h,s):
     mes = {'ID':stuID, 'H': h, 'S': s}
     print("Sending message is: ", mes)
-    response = requests.get('{}/{}'.format(API_URL, "ReqDelMsgs"), json = mes)      
-    print(response.json())      
-    if((response.ok) == True): 
+    response = requests.get('{}/{}'.format(API_URL, "ReqDelMsgs"), json = mes)
+    print(response.json())
+    if((response.ok) == True):
         res = response.json()
         return res["MSGID"]
 
-#If you decrypted the message, send back the plaintext for checking
 def Checker(stuID, stuIDB, msgID, decmsg):
-    mes = {'IDA':stuID, 'IDB':stuIDB, 'MSGID': msgID, 'DECMSG': decmsg}
+    mes = {'IDA': stuID, 'IDB':stuIDB, 'MSGID': msgID, 'DECMSG': decmsg}
     print("Sending message is: ", mes)
-    response = requests.put('{}/{}'.format(API_URL, "Checker"), json = mes)		
+    response = requests.put('{}/{}'.format(API_URL, "Checker"), json=mes)
     print(response.json())
+    
+    
+def SendMsg(idA, idB, otkID, msgid, msg, ekx, eky):
+    mes = {"IDA": idA, "IDB": idB, "OTKID": int(otkID), "MSGID": msgid, "MSG": msg, "EK.X": ekx, "EK.Y": eky}
+    print("Sending message is: ", mes)
+    response = requests.put('{}/{}'.format(API_URL, "SendMSG"), json=mes)
+    print(response.json())    
+        
+def reqOTKB(stuID, stuIDB, h, s):
+    OTK_request_msg = {'IDA': stuID, 'IDB':stuIDB, 'S': s, 'H': h}
+    print("Requesting party B's OTK ...")
+    response = requests.get('{}/{}'.format(API_URL, "ReqOTK"), json=OTK_request_msg)
+    print(response.json()) 
+    if((response.ok) == True):
+        print(response.json()) 
+        res = response.json()
+        return res['KEYID'], res['OTK.X'], res['OTK.Y']
+        
+    else:
+        return -1, 0, 0
+
+def Status(stuID, h, s):
+    mes = {'ID': stuID, 'H': h, 'S': s}
+    print("Sending message is: ", mes)
+    response = requests.get('{}/{}'.format(API_URL, "Status"), json=mes)
+    print(response.json())
+    if (response.ok == True):
+        res = response.json()
+        return res['numMSG'], res['numOTK'], res['StatusMSG']
