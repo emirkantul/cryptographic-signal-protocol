@@ -12,7 +12,7 @@ from Crypto.Cipher import AES
 
 ###################################### INITIALIZATIONS #############################################
 API_URL = 'http://10.92.52.255:5000/'
-stuID = 27041
+stuIDA = 27041
 stuIDB = 28129
 
 # Get the curve, field, order and generator
@@ -37,19 +37,19 @@ codeB = 380271
 rcode = 368095
 rcodeB = 765639
 
-stuID_bytes = stuID.to_bytes((stuID.bit_length() +7) // 8, byteorder = "big")
-stuIDB_bytes = stuIDB.to_bytes((stuID.bit_length() +7) // 8, byteorder = "big")
+stuID_bytes = stuIDA.to_bytes((stuIDA.bit_length() +7) // 8, byteorder = "big")
+stuIDB_bytes = stuIDB.to_bytes((stuIDA.bit_length() +7) // 8, byteorder = "big")
 ####################################################################################################
 
 # Given helper functions
-def IKRegReq(h, s, x, y, stuID):
-    mes = {'ID':stuID, 'H': h, 'S': s, 'IKPUB.X': x, 'IKPUB.Y': y}
+def IKRegReq(h, s, x, y, stuIDA):
+    mes = {'ID':stuIDA, 'H': h, 'S': s, 'IKPUB.X': x, 'IKPUB.Y': y}
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "IKRegReq"), json = mes)		
     if((response.ok) == False): print(response.json())
 
-def IKRegVerify(code, stuID, IKey_Pub):
-    mes = {'ID':stuID, 'CODE': code}
+def IKRegVerify(code, stuIDA, IKey_Pub):
+    mes = {'ID':stuIDA, 'CODE': code}
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "IKRegVerif"), json = mes)
     if((response.ok) == False): raise Exception(response.json())
@@ -59,8 +59,8 @@ def IKRegVerify(code, stuID, IKey_Pub):
         f.write("IK.Prv: "+str(IKey_Pr)+"\n"+"IK.Pub.x: "+str(IKey_Pub.x)+"\n"+"IK.Pub.y: "+str(IKey_Pub.y))
         f.close()
 
-def SPKReg(h, s, x, y, stuID):
-    mes = {'ID':stuID, 'H': h, 'S': s, 'SPKPUB.X': x, 'SPKPUB.Y': y}
+def SPKReg(h, s, x, y, stuIDA):
+    mes = {'ID':stuIDA, 'H': h, 'S': s, 'SPKPUB.X': x, 'SPKPUB.Y': y}
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "SPKReg"), json = mes)		
     if((response.ok) == False): 
@@ -69,32 +69,32 @@ def SPKReg(h, s, x, y, stuID):
         res = response.json()
         return res['SPKPUB.X'], res['SPKPUB.Y'], res['H'], res['S']
 
-def OTKReg(keyID, x, y, hmac, stuID):
-    mes = {'ID':stuID, 'KEYID': keyID, 'OTKI.X': x, 'OTKI.Y': y, 'HMACI': hmac}
+def OTKReg(keyID, x, y, hmac, stuIDA):
+    mes = {'ID':stuIDA, 'KEYID': keyID, 'OTKI.X': x, 'OTKI.Y': y, 'HMACI': hmac}
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "OTKReg"), json = mes)		
     print(response.json())
     if((response.ok) == False): return False
     else: return True
 
-def ResetIK(rcode, stuID):
-    mes = {'ID':stuID, 'RCODE': rcode}
+def ResetIK(rcode, stuIDA):
+    mes = {'ID':stuIDA, 'RCODE': rcode}
     print("Sending message is: ", mes)
     response = requests.delete('{}/{}'.format(API_URL, "ResetIK"), json = mes)		
     print(response.json())
     if((response.ok) == False): return False
     else: return True
 
-def ResetSPK(h, s, stuID):
-    mes = {'ID':stuID, 'H': h, 'S': s}
+def ResetSPK(h, s, stuIDA):
+    mes = {'ID':stuIDA, 'H': h, 'S': s}
     print("Sending message is: ", mes)
     response = requests.delete('{}/{}'.format(API_URL, "ResetSPK"), json = mes)		
     print(response.json())
     if((response.ok) == False): return False
     else: return True
 
-def ResetOTK(h, s, stuID):
-    mes = {'ID':stuID, 'H': h, 'S': s}
+def ResetOTK(h, s, stuIDA):
+    mes = {'ID':stuIDA, 'H': h, 'S': s}
     print("Sending message is: ", mes)
     response = requests.delete('{}/{}'.format(API_URL, "ResetOTK"), json = mes)		
     if((response.ok) == False): print(response.json())
@@ -144,15 +144,15 @@ def SignVer(message, h, s, E, QA):
         return False
 
 #Pseudo-client will send you 5 messages to your inbox via server when you call this function
-def PseudoSendMsg(h, s, stuID):
-    mes = {'ID':stuID, 'H': h, 'S': s}
+def PseudoSendMsg(h, s, stuIDA):
+    mes = {'ID':stuIDA, 'H': h, 'S': s}
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "PseudoSendMsg"), json = mes)		
     print(response.json())
 
 #Get your messages. server will send 1 message from your inbox
-def ReqMsg(h, s, stuID):
-    mes = {'ID':stuID, 'H': h, 'S': s}
+def ReqMsg(h, s, stuIDA):
+    mes = {'ID':stuIDA, 'H': h, 'S': s}
     print("Sending message is: ", mes)
     response = requests.get('{}/{}'.format(API_URL, "ReqMsg"), json = mes)	
     print(response.json())	
@@ -161,8 +161,8 @@ def ReqMsg(h, s, stuID):
         return res["IDB"], res["OTKID"], res["MSGID"], res["MSG"], res["EK.X"], res["EK.Y"]
 
 #Get the list of the deleted messages' ids.
-def ReqDelMsg(h, s, stuID):
-    mes = {'ID':stuID, 'H': h, 'S': s}
+def ReqDelMsg(h, s, stuIDA):
+    mes = {'ID':stuIDA, 'H': h, 'S': s}
     print("Sending message is: ", mes)
     response = requests.get('{}/{}'.format(API_URL, "ReqDelMsgs"), json = mes)      
     print(response.json())      
@@ -171,13 +171,13 @@ def ReqDelMsg(h, s, stuID):
         return res["MSGID"]
 
 #If you decrypted the message, send back the plaintext for checking
-def Checker(stuID, stuIDB, msgID, decmsg):
-    mes = {'IDA':stuID, 'IDB':stuIDB, 'MSGID': msgID, 'DECMSG': decmsg}
+def Checker(stuIDA, stuIDB, msgID, decmsg):
+    mes = {'IDA':stuIDA, 'IDB':stuIDB, 'MSGID': msgID, 'DECMSG': decmsg}
     print("Sending message is: ", mes)
     response = requests.put('{}/{}'.format(API_URL, "Checker"), json = mes)	
 
-def reqOTKB(stuID, stuIDB, h, s):
-    OTK_request_msg = {'IDA': stuID, 'IDB':stuIDB, 'S': s, 'H': h}
+def reqOTKB(stuIDA, stuIDB, h, s):
+    OTK_request_msg = {'IDA': stuIDA, 'IDB':stuIDB, 'S': s, 'H': h}
     print("Requesting party B's OTK ...")
     response = requests.get('{}/{}'.format(API_URL, "ReqOTK"), json=OTK_request_msg)
     print(response.json()) 
@@ -188,8 +188,8 @@ def reqOTKB(stuID, stuIDB, h, s):
     else:
         return -1, 0, 0
 
-def Status(h, s, stuID):
-    mes = {'ID': stuID, 'H': h, 'S': s}
+def Status(h, s, stuIDA):
+    mes = {'ID': stuIDA, 'H': h, 'S': s}
     print("Sending message is: ", mes)
     response = requests.get('{}/{}'.format(API_URL, "Status"), json=mes)
     print(response.json())
@@ -209,13 +209,13 @@ def SendMsg(idA, idB, otkID, msgid, msg, ekx, eky):
     Globals used:
     IKey_Pr, stuID_bytes, curve
 '''
-def GenerateSPK(stuID_bytes, stuID, IKey_Pr):
+def GenerateSPK(stuID_bytes, stuIDA, IKey_Pr):
     h, s = SignGen(stuID_bytes, curve, IKey_Pr)
-    ResetSPK(h, s, stuID)
+    ResetSPK(h, s, stuIDA)
     SPKey_Pr, SPKey_Pub = KeyGen(curve)
     msg = SPKey_Pub.x.to_bytes((SPKey_Pub.x.bit_length()+7)//8,byteorder="big") + SPKey_Pub.y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
     h, s = SignGen(msg, curve, IKey_Pr)
-    resp_x, resp_y, resp_h, resp_s  = SPKReg(h, s, SPKey_Pub.x, SPKey_Pub.y, stuID)
+    resp_x, resp_y, resp_h, resp_s  = SPKReg(h, s, SPKey_Pub.x, SPKey_Pub.y, stuIDA)
     resp_x_bytes = resp_x.to_bytes((resp_x.bit_length() + 7) // 8, byteorder='big')
     resp_y_bytes = resp_y.to_bytes((resp_y.bit_length() + 7) // 8, byteorder='big')
     msg = SPKey_Pub.x.to_bytes((resp_x.bit_length()+7)//8,byteorder="big") + resp_y.to_bytes((SPKey_Pub.y.bit_length()+7)//8,byteorder="big")
@@ -228,10 +228,10 @@ def GenerateSPK(stuID_bytes, stuID, IKey_Pr):
     Globals used:
     IKey_Pr, stuID_bytes, SPKey_Pr, SPK_Pub_Server, curve
 '''
-def GenerateOTKS(stuID_bytes, stuID, IKey_Pr, SPKey_Pr, SPK_Pub_Server, number_of_otks):
-    otks = []
+def GenerateOTKS(stuID_bytes, stuIDA, IKey_Pr, SPKey_Pr, SPK_Pub_Server, number_of_otks):
+    otks = {}
     h, s = SignGen(stuID_bytes, curve, IKey_Pr)
-    ResetOTK(h, s, stuID)
+    ResetOTK(h, s, stuIDA)
     T = SPKey_Pr * SPK_Pub_Server
     Tx_bytes = T.x.to_bytes((T.x.bit_length() + 7) // 8, byteorder='big')
     Ty_bytes = T.y.to_bytes((T.y.bit_length() + 7) // 8, byteorder='big')
@@ -240,20 +240,20 @@ def GenerateOTKS(stuID_bytes, stuID, IKey_Pr, SPKey_Pr, SPK_Pub_Server, number_o
     k_HMAC_bytes = k_hmac.to_bytes((k_hmac.bit_length() + 7) // 8, byteorder='big')
     for i in range(number_of_otks):
         OTK_pr, OTK0_pub = KeyGen(curve)
-        otks.append(OTK_pr)
+        otks[i] = OTK_pr
         print("\n", str(i) + "th OTK.")
         print("OTK private:", OTK_pr)
         print("OTK public:", OTK0_pub)
         OTK0_x_bytes = OTK0_pub.x.to_bytes((OTK0_pub.x.bit_length() + 7) // 8, byteorder='big')
         OTK0_y_bytes = OTK0_pub.y.to_bytes((OTK0_pub.y.bit_length() + 7) // 8, byteorder='big')
         hmac0 = HMAC.new(key = k_HMAC_bytes, msg=OTK0_x_bytes + OTK0_y_bytes, digestmod = SHA256)
-        OTKReg(i, OTK0_pub.x, OTK0_pub.y, hmac0.hexdigest(), stuID)
+        OTKReg(i, OTK0_pub.x, OTK0_pub.y, hmac0.hexdigest(), stuIDA)
     return otks
 
 
 # reset and generate spk and otks in case for client A
-SPKey_Pr, SPKey_Pub = GenerateSPK(stuID_bytes, stuID, IKey_Pr)
-otks = GenerateOTKS(stuID_bytes, stuID, IKey_Pr, SPKey_Pr, SPK_Pub_Server, 10)
+SPKey_Pr, SPKey_Pub = GenerateSPK(stuID_bytes, stuIDA, IKey_Pr)
+otks = GenerateOTKS(stuID_bytes, stuIDA, IKey_Pr, SPKey_Pr, SPK_Pub_Server, 10)
 
 # reset and generate spk and otks in case for client B
 SPKey_PrB, SPKey_PubB = GenerateSPK(stuIDB_bytes, stuIDB, IKey_PrB)
@@ -264,7 +264,7 @@ print("Server Public Identity Key:", IKey_Ser)
 print("Server Point:", SPK_Pub_Server)
 
 print("\n*****************************************************************************************")
-print("Client A:", stuID)
+print("Client A:", stuIDA)
 print("Public Identity Key:", IKey_Pub)
 print("Private Identity Key:", IKey_Pr)
 print("\nSigned Pre-key Private:", SPKey_Pr)
@@ -281,11 +281,11 @@ print("10 One-time Pre-Key:", otksB)
 print("*****************************************************************************************\n")
 
 # function: request n messages
-def requestMessages(h, s, n):
-    print("Requesting " + n + " messages from server..")
+def requestMessages(h, s, n, stuIDA):
+    print("Requesting", n, "messages from server..")
     messages = []
     for i in range(n):
-        stuIDB, otkID, msgID, msg, ek_x, ek_y = ReqMsg(h,s)
+        stuIDB, otkID, msgID, msg, ek_x, ek_y = ReqMsg(h,s, stuIDA)
         messages.append({
             'stuIDB': stuIDB,
             'otkID': otkID,
@@ -297,12 +297,12 @@ def requestMessages(h, s, n):
     return messages
 
 # function: decrypt given messages
-def decrypt_messages(messages, otks, stuID):
+def decrypt_messages(messages, otks, stuIDA):
     decrypted_messages = {}
     kdf_next = None
 
     for message in messages:
-        msg = message["msg"].to_bytes((message["msg"].bit_length() +7)//8, byteorder = 'big')
+        msg = message["msg"].to_bytes((message["msg"].bit_length() +7) // 8, byteorder = 'big')
         
         msg_hmac = msg[len(msg)-32:]               # hmac of the message
         message_with_nonce = msg[:len(msg)-32]     # message with nonce
@@ -332,18 +332,18 @@ def decrypt_messages(messages, otks, stuID):
             dtext = cipher.decrypt(message_with_nonce[8:])
             decrypted_message = dtext.decode('utf-8')
             print("Decrypted message:", decrypted_message)
-            Checker(stuID, message["stuIDB"], message["msgID"], decrypted_message)
+            Checker(stuIDA, message["stuIDB"], message["msgID"], decrypted_message)
             decrypted_messages[message["msgID"]] = decrypted_message
 
         else: 
             print("HMAC not verified")
-            Checker(stuID, message["stuIDB"], message["msgID"], 'INVALIDHMAC')
+            Checker(stuIDA, message["stuIDB"], message["msgID"], 'INVALIDHMAC')
             decrypted_messages[message["msgID"]] = 'INVALIDHMAC'
 
     return decrypted_messages
 
 # function: encrypt and send given messages
-def encrypt_and_send_messages(messages, stuID, stuIDB, otkPubB, idKey):
+def encrypt_and_send_messages(messages, stuIDA, stuIDB, otkPubB, idKey):
     msgID = 0
     kdf_next = None
     EkPrivA, EkPubA = KeyGen(curve)
@@ -366,23 +366,31 @@ def encrypt_and_send_messages(messages, stuID, stuIDB, otkPubB, idKey):
         k_enc = SHA3_256.new(kdf_next.digest() + b'YouTalkingToMe')
         k_hmac = SHA3_256.new(kdf_next.digest() + k_enc.digest() + b'YouCannotHandleTheTruth')
 
-        cipher = AES.new(k_enc, AES.MODE_CTR)
-        ctext = cipher.nonce + cipher.encrypt(message)
+        cipher = AES.new(k_enc.digest(), AES.MODE_CTR)
+        ctext = cipher.nonce + cipher.encrypt(bytes(message, 'utf-8'))
         print("Cipher text after encryption:", ctext)
 
-        hmac_p3 = HMAC.new(k_hmac, digestmod = SHA256).update(ctext)
-        msg = str(ctext + hmac_p3)
+        hmac = HMAC.new(k_hmac.digest(), digestmod = SHA256).update(ctext).digest()
+        msg = ctext + hmac
         print("Final message: ", msg)
-
-        SendMsg(stuID, stuIDB, idKey, msgID, msg, EkPubA.x, EkPubA.y) 
+        int_msg = int.from_bytes(msg, byteorder = "big")
+        SendMsg(stuIDA, stuIDB, idKey, msgID, int_msg, EkPubA.x, EkPubA.y) 
         msgID += 1
 
 
 # get otk of client B from server
 print("Requesting client B's public OTK")
 h, s = SignGen(stuIDB_bytes, curve, IKey_Pr)
-idKey, otkX, otkY = reqOTKB(stuID, stuIDB, h, s)
+idKey, otkX, otkY = reqOTKB(stuIDA, stuIDB, h, s)
 otkPubB = Point(otkX, otkY, curve) #public client
+print()
+
+# check status
+print("Checking client B's status..")
+h, s = SignGen(stuIDB_bytes, curve, IKey_PrB)
+numMSG, numOTK, statusMSG = Status(h, s, stuIDB)
+print("Status message:", statusMSG)
+print("Is there enough OTK keys to read all messages:", numOTK >= numMSG, "\n")
 
 messages_to_send = [
     "myMessage0",
@@ -394,11 +402,11 @@ messages_to_send = [
 print("Messages to send to client B:", messages_to_send)
 
 # sent 5 messages from client A to client B
-encrypt_and_send_messages(messages_to_send, stuID, stuIDB, otkPubB, idKey)
+encrypt_and_send_messages(messages_to_send, stuIDA, stuIDB, otkPubB, idKey)
 
 # receive 5 messages of client B
 h, s = SignGen(stuIDB_bytes, curve, IKey_PrB)
-messages = requestMessages(h, s, 5)
+messages = requestMessages(h, s, 5, stuIDB)
 
 # decrypt receive messages
 decrypted_messages = decrypt_messages(messages, otksB, stuIDB)
