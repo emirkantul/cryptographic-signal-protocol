@@ -26,8 +26,8 @@ IKey_Ser = Point(0xce1a69ecc226f9e667856ce37a44e50dbea3d58e3558078baee8fe5e017a5
 SPK_Pub_Server = Point(0xbc0360774a6ae550633c37ddde5f38a0497a7a1af5f7a60bb532aaf28957344b , 0x667bc03d5faafd1d9ad4c44507ec00871ae35a63d688732c44710918ca67e5e9, curve=curve)
 
 # Client's identity public key and private key
-IKey_Pr = 54711695610845891711285415678093810504562500554097973349097378295447174968645
-IKey_Pub = Point(0xeaa0b601668eba6177eb13991f611a8a3017fe64ca9635fc2b8154d3f78e1954 , 0x576cc7f8888c1291a324704a695539cf8e4f86634a4527b69cc27dcb4109c424, curve)
+IKey_PrA = 54711695610845891711285415678093810504562500554097973349097378295447174968645
+IKey_PubA = Point(0xeaa0b601668eba6177eb13991f611a8a3017fe64ca9635fc2b8154d3f78e1954 , 0x576cc7f8888c1291a324704a695539cf8e4f86634a4527b69cc27dcb4109c424, curve)
 IKey_PrB = 88811684008176007899207926081968991205376073643343601281773818664985783616780
 IKey_PubB = Point(0xf061448e9f63ae9015605c705a2fe16da20270dac4518910fb66995cdd2b30c , 0xb363aae72aefeb60b50f692c980488d160140ca373d881347ac8e1c8150eb415, curve)
 
@@ -252,8 +252,8 @@ def GenerateOTKS(stuID_bytes, idA, IKey_Pr, SPKey_Pr, SPK_Pub_Server, number_of_
 
 
 # reset and generate spk and otks in case for client A
-SPKey_Pr, SPKey_Pub = GenerateSPK(stuIDA_bytes, stuIDA, IKey_Pr)
-otks = GenerateOTKS(stuIDA_bytes, stuIDA, IKey_Pr, SPKey_Pr, SPK_Pub_Server, 10)
+SPKey_PrA, SPKey_PubA = GenerateSPK(stuIDA_bytes, stuIDA, IKey_PrA)
+otksA = GenerateOTKS(stuIDA_bytes, stuIDA, IKey_PrA, SPKey_PrA, SPK_Pub_Server, 10)
 
 # reset and generate spk and otks in case for client B
 SPKey_PrB, SPKey_PubB = GenerateSPK(stuIDB_bytes, stuIDB, IKey_PrB)
@@ -265,11 +265,11 @@ print("Server Point:", SPK_Pub_Server)
 
 print("\n*****************************************************************************************")
 print("Client A:", stuIDA)
-print("Public Identity Key:", IKey_Pub)
-print("Private Identity Key:", IKey_Pr)
-print("\nSigned Pre-key Private:", SPKey_Pr)
-print("Signed Pre-key Public:", SPKey_Pub)
-print("10 One-time Pre-Key:", otks)
+print("Public Identity Key:", IKey_PubA)
+print("Private Identity Key:", IKey_PrA)
+print("\nSigned Pre-key Private:", SPKey_PrA)
+print("Signed Pre-key Public:", SPKey_PubA)
+print("10 One-time Pre-Key:", otksA)
 print("*****************************************************************************************\n")
 print("\n*****************************************************************************************")
 print("Client B:", stuIDB)
@@ -343,8 +343,16 @@ def decrypt_messages(messages, otks, idA):
     return decrypted_messages
 
 # function: encrypt and send given messages
-def encrypt_and_send_messages(messages, idA, idB, otkPubB, idKey):
+def encrypt_and_send_messages(messages, idA, idB):
     msgID = 0
+
+    # get otk of client B from server
+    print("Requesting client B's public OTK")
+    h, s = SignGen(stuIDB_bytes, curve, IKey_PrA)
+    idKey, otkX, otkY = reqOTKB(stuIDA, stuIDB, h, s)
+    otkPubB = Point(otkX, otkY, curve) #public client
+    print()
+
     kdf_next = None
     EkPrivA, EkPubA = KeyGen(curve)
     T = EkPrivA * otkPubB 
@@ -370,20 +378,13 @@ def encrypt_and_send_messages(messages, idA, idB, otkPubB, idKey):
         ctext = cipher.nonce + cipher.encrypt(bytes(message, 'utf-8'))
         print("Cipher text after encryption:", ctext)
 
-        hmac = HMAC.new(k_hmac.digest(), digestmod = SHA256).update(ctext).digest()
+        hmac = HMAC.new(k_hmac.digest(), digestmod = SHA256).update(ctext[8:]).digest()
         msg = ctext + hmac
-        print("Final message: ", msg)
         int_msg = int.from_bytes(msg, byteorder = "big")
+        print("Final message: ", int_msg)
         SendMsg(idA, idB, idKey, msgID, int_msg, EkPubA.x, EkPubA.y) 
         msgID += 1
 
-
-# get otk of client B from server
-print("Requesting client B's public OTK")
-h, s = SignGen(stuIDB_bytes, curve, IKey_Pr)
-idKey, otkX, otkY = reqOTKB(stuIDA, stuIDB, h, s)
-otkPubB = Point(otkX, otkY, curve) #public client
-print()
 
 # check status
 print("Checking client B's status..")
@@ -401,8 +402,9 @@ messages_to_send = [
 ]
 print("Messages to send to client B:", messages_to_send)
 
+
 # sent 5 messages from client A to client B
-encrypt_and_send_messages(messages_to_send, stuIDA, stuIDB, otkPubB, idKey)
+encrypt_and_send_messages(messages_to_send, stuIDA, stuIDB)
 
 # receive 5 messages of client B
 h, s = SignGen(stuIDB_bytes, curve, IKey_PrB)
